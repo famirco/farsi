@@ -1,0 +1,152 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #faf9f6;
+  --surface-1: #ffffff;
+  --surface-2: #f4f2ec;
+  --border: #e2e0d8;
+  --border-strong: #c9c7bd;
+  --text-primary: #1f1e1c;
+  --text-secondary: #6b6a63;
+  --text-muted: #9a988f;
+  --accent-bg: #e6f1fb;
+  --accent-text: #185fa5;
+  --accent-fill: #378add;
+  --success-bg: #eaf3de;
+  --success-text: #3b6d11;
+  --success-fill: #639922;
+  --warning-bg: #faeeda;
+  --warning-text: #854f0b;
+  --warning-fill: #ba7517;
+
+  --background: var(--bg);
+  --foreground: var(--text-primary);
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--text-primary);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Custom CSS Helpers representing user's template */
+.wrap {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+.cover {
+  text-align: center;
+  padding: 4rem 1rem 3rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 3rem;
+}
+
+.cover h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+
+.cover p {
+  color: var(--text-secondary);
+  font-size: 16px;
+  margin: 0;
+}
+
+h2.section-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 3.5rem 0 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 2rem;
+}
+
+.overview-card {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.2rem;
+}
+
+.overview-card h3 {
+  font-size: 14px;
+  margin: 0 0 8px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.overview-card p {
+  font-size: 14px;
+  margin: 0;
+}
+
+.screen-row {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  margin-bottom: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.screen-row.reverse {
+  flex-direction: row-reverse;
+}
+
+.caption {
+  flex: 1;
+  min-width: 260px;
+  padding-top: 1rem;
+}
+
+.caption h3 {
+  font-size: 18px;
+  margin: 0 0 10px;
+}
+
+.caption p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0 0 10px;
+}
+
+.phone {
+  width: 320px;
+  flex-shrink: 0;
+  background: var(--surface-1);
+  border-radius: 26px;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.05);
+}
+
+.bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--border);
+  width: 100%;
+  overflow: hidden;
+}
+
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+}
+
+.badge {
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  display: inline-block;
+  font-weight: 600;
+}

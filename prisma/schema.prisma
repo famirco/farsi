@@ -1,0 +1,72 @@
+datasource db {
+  provider = "sqlite"
+}
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+model User {
+  id                    String    @id @default(uuid())
+  username              String    @unique
+  password              String    @default("password")
+  role                  String    @default("USER") // "USER" or "ADMIN"
+  accountType           String    @default("ADULT_HERITAGE") // "ADULT_HERITAGE", "PARENT", "CHILD"
+  parentUserId          String?   // Links child to parent user
+  whyLearning           String?   // Motivational quote for heritage adults
+  xp                    Int       @default(0)
+  streak                Int       @default(0)
+  lastActive            DateTime?
+  completedLessons      String    @default("[]") // JSON array of completed lesson IDs
+  unlockedUntilLessonId String?   // Manually unlocked up to this lesson ID by Admin
+  skills                String    @default("{\"listening\":30,\"speaking\":30,\"reading\":30,\"writing\":30}") // JSON string
+  createdAt             DateTime  @default(now())
+}
+
+model Term {
+  id      String  @id @default(uuid())
+  order   Int     @unique
+  titleEn String
+  titleFa String
+  levels  Level[]
+}
+
+model Level {
+  id      String   @id @default(uuid())
+  termId  String
+  term    Term     @relation(fields: [termId], references: [id], onDelete: Cascade)
+  order   Int
+  titleEn String
+  titleFa String
+  lessons Lesson[]
+
+  @@unique([termId, order])
+}
+
+model Lesson {
+  id        String     @id @default(uuid())
+  levelId   String
+  level     Level      @relation(fields: [levelId], references: [id], onDelete: Cascade)
+  order     Int
+  titleEn   String
+  titleFa   String
+  descEn    String
+  descFa    String
+  xpReward  Int        @default(10)
+  questions Question[]
+
+  @@unique([levelId, order])
+}
+
+model Question {
+  id            String   @id @default(uuid())
+  lessonId      String
+  lesson        Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  order         Int
+  type          String   // "SELECT" or "SPEAK"
+  promptEn      String
+  promptFa      String
+  options       String   @default("[]") // JSON string array of options
+  correctAnswer String
+}
