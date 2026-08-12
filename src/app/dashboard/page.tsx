@@ -45,6 +45,7 @@ interface UserProfile {
   completedLessons: string; // JSON string
   unlockedUntilLessonId: string | null;
   skills: string; // JSON string
+  unlockedTerms: string; // JSON string
 }
 
 export default function Dashboard() {
@@ -94,7 +95,11 @@ export default function Dashboard() {
             termsData.forEach((t: Term) => {
               t.levels.forEach((lv: Level) => {
                 lv.lessons.forEach((ls: Lesson) => {
-                  flat.push(ls);
+                  flat.push({
+                    ...ls,
+                    termId: t.id,
+                    termOrder: t.order,
+                  } as any);
                 });
               });
             });
@@ -154,7 +159,27 @@ export default function Dashboard() {
     }
   };
 
+  const checkIsTermUnlocked = (termOrder: number, termId: string) => {
+    if (termOrder === 1) return true;
+    if (user?.unlockedTerms) {
+      try {
+        const unlockedList = JSON.parse(user.unlockedTerms || "[]");
+        if (Array.isArray(unlockedList) && (unlockedList.includes(termId) || unlockedList.includes(String(termOrder)))) {
+          return true;
+        }
+      } catch (e) {}
+    }
+    return false;
+  };
+
   const checkIsUnlocked = (lessonId: string, indexInFlat: number) => {
+    // Check if the term it belongs to is unlocked first
+    const lessonObj = flatLessons[indexInFlat];
+    if (lessonObj && (lessonObj as any).termOrder) {
+      const isTermUnlocked = checkIsTermUnlocked((lessonObj as any).termOrder, (lessonObj as any).termId);
+      if (!isTermUnlocked) return false;
+    }
+
     if (indexInFlat === 0) return true;
 
     if (user?.unlockedUntilLessonId) {
@@ -401,9 +426,7 @@ export default function Dashboard() {
       <header className="border-b border-[#e2e0d8] bg-white sticky top-0 z-30 shadow-sm">
         <div className="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="p-1.5 bg-[#378add] rounded-lg">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
+            <img src="/logo.png" alt="Farsiyar Logo" className="w-8 h-8 object-contain" style={{ mixBlendMode: "multiply" }} />
             <span className="font-bold text-[#1f1e1c] text-lg">Farsiyar</span>
           </Link>
 
@@ -534,17 +557,31 @@ export default function Dashboard() {
 
         {/* Right Column: Learning Path */}
         <div className="md:col-span-2 space-y-8">
-          {terms.map((term) => (
-            <div key={term.id} className="bg-white border border-[#e2e0d8] rounded-3xl p-6 shadow-sm">
-              <div className="border-b border-[#e2e0d8] pb-3 mb-6">
-                <span className="text-[10px] bg-[#e6f1fb] text-[#185fa5] px-2 py-0.5 rounded-full border border-[#378add]/15 font-bold uppercase tracking-wider">
-                  Term {term.order}
-                </span>
-                <h2 className="text-lg font-bold text-[#1f1e1c] mt-1">{term.titleEn}</h2>
-                <p className="text-xs text-[#6b6a63]">{term.titleFa}</p>
-              </div>
+          {terms.map((term) => {
+            const isTermUnlocked = checkIsTermUnlocked(term.order, term.id);
+            return (
+              <div key={term.id} className="bg-white border border-[#e2e0d8] rounded-3xl p-6 shadow-sm relative overflow-hidden">
+                {/* Lock Overlay if term is premium and not unlocked */}
+                {!isTermUnlocked && (
+                  <div className="absolute inset-0 bg-[#faf9f6]/90 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center p-6 text-center">
+                    <div className="w-11 h-11 bg-[#faeeda] rounded-full flex items-center justify-center text-[#854f0b] border border-[#ba7517]/10 mb-3 shadow-sm">
+                      <Lock className="w-4 h-4" />
+                    </div>
+                    <p className="font-bold text-sm text-[#1f1e1c]">Premium Term - Locked</p>
+                    <p className="text-[11px] text-[#6b6a63] mt-1 max-w-[280px]">
+                      This term requires package activation. Contact admin to unlock this course content.
+                    </p>
+                  </div>
+                )}
+                <div className="border-b border-[#e2e0d8] pb-3 mb-6">
+                  <span className="text-[10px] bg-[#e6f1fb] text-[#185fa5] px-2 py-0.5 rounded-full border border-[#378add]/15 font-bold uppercase tracking-wider">
+                    Term {term.order}
+                  </span>
+                  <h2 className="text-lg font-bold text-[#1f1e1c] mt-1">{term.titleEn}</h2>
+                  <p className="text-xs text-[#6b6a63]">{term.titleFa}</p>
+                </div>
 
-              <div className="space-y-8">
+                <div className="space-y-8">
                 {term.levels.map((level) => (
                   <div key={level.id} className="space-y-6">
                     <div className="bg-[#f4f2ec] px-4 py-2 rounded-xl border border-[#e2e0d8] flex justify-between items-center">
@@ -623,8 +660,9 @@ export default function Dashboard() {
                 ))}
               </div>
             </div>
-          ))}
-        </div>
+          );
+        })}
+      </div>
       </main>
     </div>
   );

@@ -21,6 +21,7 @@ model User {
   completedLessons      String    @default("[]") // JSON array of completed lesson IDs
   unlockedUntilLessonId String?   // Manually unlocked up to this lesson ID by Admin
   skills                String    @default("{\"listening\":30,\"speaking\":30,\"reading\":30,\"writing\":30}") // JSON string
+  unlockedTerms         String    @default("[]") // JSON array of unlocked Term IDs
   createdAt             DateTime  @default(now())
 }
 

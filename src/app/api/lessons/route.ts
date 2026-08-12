@@ -18,6 +18,19 @@ export async function GET() {
   }
 }
 
+function parseNum(val: any): number {
+  if (typeof val === "number") return val;
+  if (!val) return 1;
+  let str = String(val).trim();
+  const p = ["۰","۱","۲","۳","۴","۵","۶","۷","۸","۹"];
+  const a = ["٠","١","٢","٣","٤","٥","٦","٧","٨","٩"];
+  for (let i = 0; i < 10; i++) {
+    str = str.replace(new RegExp(p[i], 'g'), String(i)).replace(new RegExp(a[i], 'g'), String(i));
+  }
+  const parsed = parseInt(str, 10);
+  return isNaN(parsed) ? 1 : parsed;
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -27,21 +40,45 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Level ID and Titles are required" }, { status: 400 });
     }
 
+    const parsedOrder = parseNum(order);
+    const parsedXp = parseNum(xpReward || 10);
+
+    // Shift existing lessons with order >= parsedOrder in descending order to avoid unique constraints
+    const existingLessons = await prisma.lesson.findMany({
+      where: { levelId, order: { gte: parsedOrder } },
+      orderBy: { order: "desc" },
+    });
+
+    await prisma.$transaction(
+      existingLessons.map((les) =>
+        prisma.lesson.update({
+          where: { id: les.id },
+          data: { order: les.order + 1 },
+        })
+      )
+    );
+
     const lesson = await prisma.lesson.create({
       data: {
         levelId,
-        order: parseInt(order) || 1,
+        order: parsedOrder,
         titleEn,
         titleFa,
         descEn: descEn || "",
         descFa: descFa || "",
-        xpReward: parseInt(xpReward) || 10,
+        xpReward: parsedXp,
       },
     });
 
     return NextResponse.json(lesson);
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating lesson:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    if (error.code === "P2002") {
+      return NextResponse.json(
+        { error: "Unique constraint failed: A Lesson with this Order already exists under this Level." },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
   }
 }

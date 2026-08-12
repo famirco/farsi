@@ -31,6 +31,10 @@ interface Lesson {
   descEn: string;
   descFa: string;
   xpReward: number;
+  levelName?: string;
+  levelOrder?: number;
+  termName?: string;
+  termOrder?: number;
 }
 
 interface Question {
@@ -50,6 +54,7 @@ interface UserProfile {
   xp: number;
   streak: number;
   unlockedUntilLessonId: string | null;
+  unlockedTerms: string;
 }
 
 export default function AdminPanel() {
@@ -90,6 +95,14 @@ export default function AdminPanel() {
   const [qPromptFa, setQPromptFa] = useState("");
   const [qOptions, setQOptions] = useState("");
   const [qCorrect, setQCorrect] = useState("");
+  const [editingQuestionId, setEditingQuestionId] = useState<string | null>(null);
+
+  // LISTEN_IMAGE specific states
+  const [imgOption1, setImgOption1] = useState("");
+  const [imgOption2, setImgOption2] = useState("");
+  const [imgOption3, setImgOption3] = useState("");
+  const [imgOption4, setImgOption4] = useState("");
+  const [imgCorrectIndex, setImgCorrectIndex] = useState(0);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -115,13 +128,19 @@ export default function AdminPanel() {
         const termsData = await termsRes.json();
         setTerms(termsData);
 
-        // Flatten all lessons for easy mapping
+        // Flatten all lessons and enrich with parent Term/Level metadata
         const flatLessons: Lesson[] = [];
         if (Array.isArray(termsData)) {
           termsData.forEach((t: Term) => {
             t.levels.forEach((lv: Level) => {
               lv.lessons.forEach((ls: Lesson) => {
-                flatLessons.push(ls);
+                flatLessons.push({
+                  ...ls,
+                  levelName: lv.titleEn,
+                  levelOrder: lv.order,
+                  termName: t.titleEn,
+                  termOrder: t.order,
+                });
               });
             });
           });
@@ -152,7 +171,13 @@ export default function AdminPanel() {
       termsData.forEach((t: Term) => {
         t.levels.forEach((lv: Level) => {
           lv.lessons.forEach((ls: Lesson) => {
-            flatLessons.push(ls);
+            flatLessons.push({
+              ...ls,
+              levelName: lv.titleEn,
+              levelOrder: lv.order,
+              termName: t.titleEn,
+              termOrder: t.order,
+            });
           });
         });
       });
@@ -180,9 +205,13 @@ export default function AdminPanel() {
         setTermOrder("");
         setTermTitleEn("");
         setTermTitleFa("");
+      } else {
+        const errData = await res.json();
+        alert(errData.error || "Failed to create Term");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      alert(err.message || "An unexpected error occurred");
     }
   };
 
@@ -208,9 +237,13 @@ export default function AdminPanel() {
         setLevelOrder("");
         setLevelTitleEn("");
         setLevelTitleFa("");
+      } else {
+        const errData = await res.json();
+        alert(errData.error || "Failed to create Level");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      alert(err.message || "An unexpected error occurred");
     }
   };
 
@@ -240,9 +273,13 @@ export default function AdminPanel() {
         setLessonTitleFa("");
         setLessonDescEn("");
         setLessonDescFa("");
+      } else {
+        const errData = await res.json();
+        alert(errData.error || "Failed to create Lesson");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      alert(err.message || "An unexpected error occurred");
     }
   };
 
@@ -259,46 +296,184 @@ export default function AdminPanel() {
 
   const handleCreateQuestion = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedLesson || !qPromptEn || !qCorrect) return;
+    if (!selectedLesson || !qPromptEn) return;
 
-    const parsedOptions = qType === "SELECT" ? qOptions.split(",").map((o) => o.trim()) : [];
+    if ((qType === "LISTEN_IMAGE" || qType === "STORY_ORDER") && (!imgOption1 || !imgOption2 || !imgOption3 || !imgOption4)) {
+      alert("Please upload all 4 images for the question!");
+      return;
+    }
+    if (qType !== "LISTEN_IMAGE" && qType !== "STORY_ORDER" && !qCorrect) {
+      alert("Please specify the correct answer!");
+      return;
+    }
+
+    const parsedOptions = (qType === "LISTEN_IMAGE" || qType === "STORY_ORDER")
+      ? [imgOption1, imgOption2, imgOption3, imgOption4].filter(Boolean)
+      : qOptions.split(",").map((o) => o.trim());
+
+    // Correct answer for STORY_ORDER is a JSON string of correct sequence
+    const finalCorrectAnswer = qType === "STORY_ORDER"
+      ? JSON.stringify([imgOption1, imgOption2, imgOption3, imgOption4])
+      : qType === "LISTEN_IMAGE"
+      ? [imgOption1, imgOption2, imgOption3, imgOption4][imgCorrectIndex] || ""
+      : qCorrect.trim();
 
     try {
-      const res = await fetch(`/api/lessons/${selectedLesson.id}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          order: qOrder,
-          type: qType,
-          promptEn: qPromptEn,
-          promptFa: qPromptFa,
-          options: parsedOptions,
-          correctAnswer: qCorrect.trim(),
-        }),
-      });
+      if (editingQuestionId) {
+        // Edit mode (PUT)
+        const res = await fetch(`/api/questions/${editingQuestionId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            order: qOrder,
+            type: qType,
+            promptEn: qPromptEn,
+            promptFa: qPromptFa,
+            options: parsedOptions,
+            correctAnswer: finalCorrectAnswer,
+          }),
+        });
 
-      if (res.ok) {
-        const newQuestion = await res.json();
-        setQuestions((prev) => [...prev, newQuestion].sort((a, b) => a.order - b.order));
-        setQOrder("");
-        setQPromptEn("");
-        setQPromptFa("");
-        setQOptions("");
-        setQCorrect("");
+        if (res.ok) {
+          const updatedQ = await res.json();
+          setQuestions((prev) =>
+            prev.map((q) => (q.id === editingQuestionId ? updatedQ : q)).sort((a, b) => a.order - b.order)
+          );
+          cancelEditQuestion();
+        }
+      } else {
+        // Create mode (POST)
+        const res = await fetch(`/api/lessons/${selectedLesson.id}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            order: qOrder,
+            type: qType,
+            promptEn: qPromptEn,
+            promptFa: qPromptFa,
+            options: parsedOptions,
+            correctAnswer: finalCorrectAnswer,
+          }),
+        });
+
+        if (res.ok) {
+          const newQuestion = await res.json();
+          setQuestions((prev) => [...prev, newQuestion].sort((a, b) => a.order - b.order));
+          setQOrder("");
+          setQPromptEn("");
+          setQPromptFa("");
+          setQOptions("");
+          setQCorrect("");
+          setImgOption1("");
+          setImgOption2("");
+          setImgOption3("");
+          setImgOption4("");
+          setImgCorrectIndex(0);
+        }
       }
     } catch (err) {
       console.error(err);
     }
   };
 
-  const handleUserUnlockChange = async (userId: string, lessonId: string) => {
+  const handleDeleteQuestion = async (qId: string) => {
+    if (!confirm("Are you sure you want to delete this question?")) return;
+    try {
+      const res = await fetch(`/api/questions/${qId}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setQuestions((prev) => prev.filter((q) => q.id !== qId));
+        if (editingQuestionId === qId) {
+          cancelEditQuestion();
+        }
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const startEditQuestion = (q: Question) => {
+    setEditingQuestionId(q.id);
+    setQOrder(String(q.order));
+    setQType(q.type);
+    setQPromptEn(q.promptEn);
+    setQPromptFa(q.promptFa || "");
+    
+    let opts: string[] = [];
+    try {
+      opts = JSON.parse(q.options || "[]");
+    } catch (e) {}
+
+    if (q.type === "LISTEN_IMAGE" || q.type === "STORY_ORDER") {
+      setImgOption1(opts[0] || "");
+      setImgOption2(opts[1] || "");
+      setImgOption3(opts[2] || "");
+      setImgOption4(opts[3] || "");
+      if (q.type === "LISTEN_IMAGE") {
+        const correctIdx = opts.indexOf(q.correctAnswer);
+        setImgCorrectIndex(correctIdx !== -1 ? correctIdx : 0);
+      }
+    } else {
+      setQOptions(opts.join(", "));
+    }
+    setQCorrect(q.correctAnswer);
+  };
+
+  const cancelEditQuestion = () => {
+    setEditingQuestionId(null);
+    setQOrder("");
+    setQPromptEn("");
+    setQPromptFa("");
+    setQOptions("");
+    setQCorrect("");
+    setImgOption1("");
+    setImgOption2("");
+    setImgOption3("");
+    setImgOption4("");
+    setImgCorrectIndex(0);
+  };
+
+  const handleImageUpload = async (file: File, setUrl: (url: string) => void) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUrl(data.url);
+      } else {
+        alert("Upload failed!");
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Upload error!");
+    }
+  };
+
+
+  const handleUserTermToggle = async (userId: string, termId: string, isChecked: boolean, currentUnlockedTermsJson: string) => {
+    let list: string[] = [];
+    try {
+      list = JSON.parse(currentUnlockedTermsJson || "[]");
+    } catch (e) {}
+
+    if (isChecked) {
+      if (!list.includes(termId)) list.push(termId);
+    } else {
+      list = list.filter((id) => id !== termId);
+    }
+
     try {
       const res = await fetch("/api/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           userId,
-          unlockedUntilLessonId: lessonId || null,
+          unlockedTerms: JSON.stringify(list),
         }),
       });
 
@@ -379,10 +554,10 @@ export default function AdminPanel() {
                 <thead>
                   <tr className="border-b border-[#e2e0d8] text-[#6b6a63] font-bold text-[10px] uppercase tracking-wider">
                     <th className="pb-3 w-1/4">User</th>
-                    <th className="pb-3 w-1/6">Role</th>
-                    <th className="pb-3 w-1/6">XP Points</th>
-                    <th className="pb-3 w-1/6">Active Streak</th>
-                    <th className="pb-3 w-1/4">Unlocked Up To Stage</th>
+                    <th className="pb-3 w-1/12">Role</th>
+                    <th className="pb-3 w-1/12">XP</th>
+                    <th className="pb-3 w-1/12">Streak</th>
+                    <th className="pb-3 w-1/2">Unlocked Terms</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -395,20 +570,31 @@ export default function AdminPanel() {
                         </span>
                       </td>
                       <td className="py-4 font-semibold text-[#185fa5]">{u.xp} XP</td>
-                      <td className="py-4 font-semibold text-[#854f0b]">🔥 {u.streak} days</td>
+                      <td className="py-4 font-semibold text-[#854f0b]">🔥 {u.streak}</td>
                       <td className="py-4">
-                        <select
-                          value={u.unlockedUntilLessonId || ""}
-                          onChange={(e) => handleUserUnlockChange(u.id, e.target.value)}
-                          className="px-3 py-1.5 bg-[#faf9f6] border border-[#c9c7bd] rounded-xl focus:outline-none focus:border-[#378add] text-xs text-[#1f1e1c] max-w-[200px]"
-                        >
-                          <option value="">Normal progression (default)</option>
-                          {allLessons.map((l) => (
-                            <option key={l.id} value={l.id}>
-                              Unlock up to Lesson {l.order}: {l.titleEn}
-                            </option>
-                          ))}
-                        </select>
+                        <div className="flex flex-wrap gap-2">
+                          {terms.map((t) => {
+                            const isFree = t.order === 1;
+                            let isChecked = isFree;
+                            try {
+                              const list = JSON.parse(u.unlockedTerms || "[]");
+                              if (list.includes(t.id)) isChecked = true;
+                            } catch (e) {}
+
+                            return (
+                              <label key={t.id} className="inline-flex items-center gap-1 bg-[#faf9f6] border border-[#e2e0d8] px-2 py-1 rounded-lg text-[10px] font-semibold cursor-pointer hover:bg-[#f4f2ec]">
+                                <input
+                                  type="checkbox"
+                                  checked={isChecked}
+                                  disabled={isFree}
+                                  onChange={(e) => handleUserTermToggle(u.id, t.id, e.target.checked, u.unlockedTerms)}
+                                  className="accent-[#378add] cursor-pointer"
+                                />
+                                <span>T{t.order} {isFree ? "(Free)" : ""}</span>
+                              </label>
+                            );
+                          })}
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -590,7 +776,7 @@ export default function AdminPanel() {
                           <optgroup key={t.id} label={`Term ${t.order}: ${t.titleEn}`}>
                             {t.levels.map((lv) => (
                               <option key={lv.id} value={lv.id}>
-                                Level {lv.order}: {lv.titleEn}
+                                Level {lv.order}: {lv.titleEn} (Term {t.order})
                               </option>
                             ))}
                           </optgroup>
@@ -694,7 +880,14 @@ export default function AdminPanel() {
                       }`}
                     >
                       <div>
-                        <span className="text-[10px] bg-[#f4f2ec] text-[#6b6a63] px-1.5 py-0.5 rounded font-bold mr-2">Order {l.order}</span>
+                        <div className="flex flex-wrap items-center gap-2 mb-1">
+                          <span className="text-[10px] bg-[#f4f2ec] text-[#6b6a63] px-1.5 py-0.5 rounded font-bold">Order {l.order}</span>
+                          {l.termOrder && l.levelOrder && (
+                            <span className="text-[10px] text-[#185fa5] font-semibold">
+                              Term {l.termOrder} &gt; Level {l.levelOrder} ({l.levelName})
+                            </span>
+                          )}
+                        </div>
                         <span className="font-bold text-sm">{l.titleEn} / {l.titleFa}</span>
                       </div>
                       <span className="text-xs text-[#185fa5] font-bold">Edit Questions</span>
@@ -709,8 +902,16 @@ export default function AdminPanel() {
               {selectedLesson ? (
                 <>
                   <div className="bg-white border border-[#e2e0d8] rounded-3xl p-6 shadow-sm">
-                    <h2 className="text-base font-bold mb-4 flex items-center gap-2">
-                      <ListPlus className="w-4 h-4 text-[#185fa5]" /> Add Question in "{selectedLesson.titleEn}"
+                    <h2 className="text-base font-bold mb-4 flex items-center gap-2 flex-wrap">
+                      <ListPlus className="w-4 h-4 text-[#185fa5]" />
+                      <span>
+                        {editingQuestionId ? "Edit" : "Add"} Question in "{selectedLesson.titleEn}"
+                        {selectedLesson.termOrder && selectedLesson.levelOrder && (
+                          <span className="text-[11px] text-[#6b6a63] font-normal block mt-0.5">
+                            (Term {selectedLesson.termOrder} &gt; Level {selectedLesson.levelOrder}: {selectedLesson.levelName})
+                          </span>
+                        )}
+                      </span>
                     </h2>
                     <form onSubmit={handleCreateQuestion} className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
@@ -734,6 +935,8 @@ export default function AdminPanel() {
                           >
                             <option value="SELECT">Multiple Choice (SELECT)</option>
                             <option value="SPEAK">Pronunciation Test (SPEAK)</option>
+                            <option value="LISTEN_IMAGE">Listen & Select Image (LISTEN_IMAGE)</option>
+                            <option value="STORY_ORDER">Story Sequence Match (STORY_ORDER)</option>
                           </select>
                         </div>
                       </div>
@@ -751,14 +954,46 @@ export default function AdminPanel() {
                       </div>
 
                       <div>
-                        <label className="block text-[11px] font-semibold text-[#6b6a63] mb-1">Persian word to display</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. سلام"
-                          value={qPromptFa}
-                          onChange={(e) => setQPromptFa(e.target.value)}
-                          className="w-full px-3.5 py-2.5 bg-[#faf9f6] border border-[#c9c7bd] rounded-xl focus:outline-none focus:border-[#378add] text-xs text-[#1f1e1c]"
-                        />
+                        <label className="block text-[11px] font-semibold text-[#6b6a63] mb-1">
+                          {qType === "STORY_ORDER" ? "Farsi Audio File (Optional upload or URL)" : "Persian word to display"}
+                        </label>
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            placeholder={qType === "STORY_ORDER" ? "e.g. /uploads/story.mp3" : "e.g. سلام"}
+                            value={qPromptFa}
+                            onChange={(e) => setQPromptFa(e.target.value)}
+                            className="flex-1 px-3.5 py-2.5 bg-[#faf9f6] border border-[#c9c7bd] rounded-xl focus:outline-none focus:border-[#378add] text-xs text-[#1f1e1c]"
+                          />
+                          {qType === "STORY_ORDER" && (
+                            <label className="px-4 py-2.5 bg-[#378add] hover:bg-[#185fa5] text-white rounded-xl font-bold text-xs cursor-pointer flex items-center justify-center">
+                              Upload Audio
+                              <input
+                                type="file"
+                                accept="audio/*"
+                                onChange={async (e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file) {
+                                    const formData = new FormData();
+                                    formData.append("file", file);
+                                    try {
+                                      const res = await fetch("/api/upload", { method: "POST", body: formData });
+                                      if (res.ok) {
+                                        const data = await res.json();
+                                        setQPromptFa(data.url);
+                                      } else {
+                                        alert("Audio upload failed!");
+                                      }
+                                    } catch (err) {
+                                      console.error(err);
+                                    }
+                                  }
+                                }}
+                                className="hidden"
+                              />
+                            </label>
+                          )}
+                        </div>
                       </div>
 
                       {qType === "SELECT" && (
@@ -775,24 +1010,103 @@ export default function AdminPanel() {
                         </div>
                       )}
 
-                      <div>
-                        <label className="block text-[11px] font-semibold text-[#6b6a63] mb-1">Correct Answer (Exact match)</label>
-                        <input
-                          type="text"
-                          placeholder="e.g. Salâm (Hello) or سلام"
-                          value={qCorrect}
-                          onChange={(e) => setQCorrect(e.target.value)}
-                          className="w-full px-3.5 py-2.5 bg-[#faf9f6] border border-[#c9c7bd] rounded-xl focus:outline-none focus:border-[#378add] text-xs text-[#1f1e1c]"
-                          required
-                        />
-                      </div>
+                      {(qType === "LISTEN_IMAGE" || qType === "STORY_ORDER") && (
+                        <div className="space-y-4 border border-[#e2e0d8] p-4 rounded-2xl bg-[#faf9f6]">
+                          <span className="text-[11px] font-bold text-[#1f1e1c] block mb-2">
+                            {qType === "STORY_ORDER"
+                              ? "Upload 4 Story Steps in Correct Sequence (1 is First, 4 is Last)"
+                              : "Upload 4 Images & Select the Correct One"}
+                          </span>
+                          
+                          <div className="grid grid-cols-2 gap-3">
+                            {[
+                              { label: qType === "STORY_ORDER" ? "Step 1" : "Option 1", val: imgOption1, setVal: setImgOption1, index: 0 },
+                              { label: qType === "STORY_ORDER" ? "Step 2" : "Option 2", val: imgOption2, setVal: setImgOption2, index: 1 },
+                              { label: qType === "STORY_ORDER" ? "Step 3" : "Option 3", val: imgOption3, setVal: setImgOption3, index: 2 },
+                              { label: qType === "STORY_ORDER" ? "Step 4" : "Option 4", val: imgOption4, setVal: setImgOption4, index: 3 },
+                            ].map((opt) => (
+                              <div key={opt.index} className="flex flex-col gap-1.5 p-3 bg-white border border-[#e2e0d8] rounded-xl relative">
+                                <label className="text-[10px] font-bold text-[#6b6a63] flex justify-between items-center">
+                                  <span>{opt.label}</span>
+                                  {qType === "LISTEN_IMAGE" && (
+                                    <span className="inline-flex items-center gap-1 cursor-pointer">
+                                      <input
+                                        type="radio"
+                                        name="correct_img"
+                                        checked={imgCorrectIndex === opt.index}
+                                        onChange={() => setImgCorrectIndex(opt.index)}
+                                        className="accent-[#378add] cursor-pointer"
+                                      />
+                                      <span className="text-[9px] text-[#3b6d11]">Correct</span>
+                                    </span>
+                                  )}
+                                </label>
+                                
+                                {opt.val ? (
+                                  <div className="relative aspect-square w-full rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center border border-[#e2e0d8]">
+                                    <img src={opt.val} alt={opt.label} className="object-contain max-h-full max-w-full" />
+                                    <button
+                                      type="button"
+                                      onClick={() => opt.setVal("")}
+                                      className="absolute top-1 right-1 bg-red-600 hover:bg-red-700 text-white rounded-full p-1 text-[8px] font-bold cursor-pointer shadow-sm"
+                                    >
+                                      Remove
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="aspect-square w-full rounded-lg bg-[#faf9f6] border border-dashed border-[#c9c7bd] flex items-center justify-center">
+                                    <label className="flex flex-col items-center justify-center gap-1 cursor-pointer w-full h-full p-2">
+                                      <span className="text-[18px] text-[#6b6a63]">+</span>
+                                      <span className="text-[9px] text-[#6b6a63] font-bold text-center">Upload Image</span>
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                          const file = e.target.files?.[0];
+                                          if (file) handleImageUpload(file, opt.setVal);
+                                        }}
+                                        className="hidden"
+                                      />
+                                    </label>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
-                      <button
-                        type="submit"
-                        className="w-full py-2.5 bg-[#1f1e1c] hover:bg-black text-white rounded-xl font-semibold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <Plus className="w-3.5 h-3.5" /> Add Question
-                      </button>
+                      {qType !== "LISTEN_IMAGE" && qType !== "STORY_ORDER" && (
+                        <div>
+                          <label className="block text-[11px] font-semibold text-[#6b6a63] mb-1">Correct Answer (Exact match)</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Salâm (Hello) or سلام"
+                            value={qCorrect}
+                            onChange={(e) => setQCorrect(e.target.value)}
+                            className="w-full px-3.5 py-2.5 bg-[#faf9f6] border border-[#c9c7bd] rounded-xl focus:outline-none focus:border-[#378add] text-xs text-[#1f1e1c]"
+                            required
+                          />
+                        </div>
+                      )}
+
+                      <div className="flex gap-2">
+                        <button
+                          type="submit"
+                          className="flex-1 py-2.5 bg-[#1f1e1c] hover:bg-black text-white rounded-xl font-semibold text-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          {editingQuestionId ? "Save Changes" : <><Plus className="w-3.5 h-3.5" /> Add Question</>}
+                        </button>
+                        {editingQuestionId && (
+                          <button
+                            type="button"
+                            onClick={cancelEditQuestion}
+                            className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold text-xs transition-all cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                        )}
+                      </div>
                     </form>
                   </div>
 
@@ -808,8 +1122,24 @@ export default function AdminPanel() {
                           </div>
                           <div className="text-xs font-bold">{q.promptEn}</div>
                           {q.promptFa && <div className="text-sm font-bold text-[#185fa5] mt-1">{q.promptFa}</div>}
-                          <div className="text-xs text-[#3b6d11] bg-[#eaf3de] p-2 rounded-lg border border-[#639922]/10 mt-2 font-bold">
+                          <div className="text-xs text-[#3b6d11] bg-[#eaf3de] p-2 rounded-lg border border-[#639922]/10 mt-2 font-bold break-all">
                             Correct: {q.correctAnswer}
+                          </div>
+                          
+                          {/* Edit / Delete actions */}
+                          <div className="flex justify-end gap-3 mt-3 pt-3 border-t border-[#faf9f6] text-[10px] font-bold">
+                            <button
+                              onClick={() => startEditQuestion(q)}
+                              className="text-[#185fa5] hover:underline cursor-pointer"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteQuestion(q.id)}
+                              className="text-red-600 hover:underline cursor-pointer"
+                            >
+                              Delete
+                            </button>
                           </div>
                         </div>
                       ))}

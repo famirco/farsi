@@ -8,7 +8,7 @@ import { ArrowLeft, CheckCircle2, XCircle, Mic, MicOff, Volume2, AlertTriangle }
 interface Question {
   id: string;
   order: number;
-  type: "SELECT" | "SPEAK";
+  type: "SELECT" | "SPEAK" | "LISTEN_IMAGE" | "STORY_ORDER";
   promptEn: string;
   promptFa: string;
   options: string; // JSON string array
@@ -30,6 +30,9 @@ export default function LessonPage() {
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  
+  // STORY_ORDER specific state
+  const [storyOrderList, setStoryOrderList] = useState<string[]>([]);
   const [isAnswerChecked, setIsAnswerChecked] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
 
@@ -65,9 +68,25 @@ export default function LessonPage() {
         setIsLoading(false);
       }
     }
-
     fetchLesson();
   }, [id, router]);
+
+  useEffect(() => {
+    if (!lesson || !lesson.questions || lesson.questions.length === 0) return;
+    const currentQ = lesson.questions[currentQIndex];
+    if (currentQ && currentQ.type === "STORY_ORDER" && storyOrderList.length === 0) {
+      try {
+        const opts = JSON.parse(currentQ.options || "[]");
+        if (Array.isArray(opts) && opts.length > 0) {
+          const shuffled = [...opts].sort(() => Math.random() - 0.5);
+          setStoryOrderList(shuffled);
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+  }, [currentQIndex, lesson, storyOrderList.length]);
+
 
   // Set up Speech Recognition on browser
   useEffect(() => {
@@ -199,8 +218,12 @@ export default function LessonPage() {
     if (!lesson || isAnswerChecked) return;
 
     const currentQuestion = lesson.questions[currentQIndex];
-    if (currentQuestion.type === "SELECT") {
+    if (currentQuestion.type === "SELECT" || currentQuestion.type === "LISTEN_IMAGE") {
       const correct = selectedOption === currentQuestion.correctAnswer;
+      setIsCorrect(correct);
+      setIsAnswerChecked(true);
+    } else if (currentQuestion.type === "STORY_ORDER") {
+      const correct = JSON.stringify(storyOrderList) === currentQuestion.correctAnswer;
       setIsCorrect(correct);
       setIsAnswerChecked(true);
     }
@@ -212,6 +235,7 @@ export default function LessonPage() {
     if (currentQIndex < lesson.questions.length - 1) {
       setCurrentQIndex((prev) => prev + 1);
       setSelectedOption(null);
+      setStoryOrderList([]);
       setIsAnswerChecked(false);
       setSpokenText("");
       setSpeechError("");
@@ -349,16 +373,25 @@ export default function LessonPage() {
 
             {currentQuestion.promptFa && (
               <div className="flex items-center gap-3 bg-[#e6f1fb] border border-[#378add]/10 p-4 rounded-xl">
-                <span className="text-2xl font-bold text-[#185fa5] dir-rtl flex-1">
-                  {currentQuestion.promptFa}
-                </span>
-                <button
-                  onClick={() => handleTextToSpeech(currentQuestion.promptFa)}
-                  className="p-2 bg-white hover:bg-[#f4f2ec] border border-[#e2e0d8] rounded-lg transition-all cursor-pointer"
-                  title="Listen"
-                >
-                  <Volume2 className="w-4 h-4 text-[#185fa5]" />
-                </button>
+                {currentQuestion.promptFa.startsWith("/uploads/") ? (
+                  <audio controls className="w-full h-10 accent-[#378add]">
+                    <source src={currentQuestion.promptFa} type="audio/mpeg" />
+                    Your browser does not support the audio element.
+                  </audio>
+                ) : (
+                  <>
+                    <span className="text-2xl font-bold text-[#185fa5] dir-rtl flex-1">
+                      {currentQuestion.promptFa}
+                    </span>
+                    <button
+                      onClick={() => handleTextToSpeech(currentQuestion.promptFa)}
+                      className="p-2 bg-white hover:bg-[#f4f2ec] border border-[#e2e0d8] rounded-lg transition-all cursor-pointer"
+                      title="Listen"
+                    >
+                      <Volume2 className="w-4 h-4 text-[#185fa5]" />
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -382,6 +415,80 @@ export default function LessonPage() {
                   </button>
                 );
               })}
+            </div>
+          ) : currentQuestion.type === "LISTEN_IMAGE" ? (
+            <div className="grid grid-cols-2 gap-4">
+              {optionsList.map((opt) => {
+                const isSelected = selectedOption === opt;
+                return (
+                  <button
+                    key={opt}
+                    disabled={isAnswerChecked}
+                    onClick={() => handleOptionSelect(opt)}
+                    className={`relative border-2 rounded-2xl overflow-hidden p-2 bg-white transition-all cursor-pointer ${
+                      isSelected
+                        ? "border-[#378add] ring-2 ring-[#378add]/10"
+                        : "border-[#e2e0d8] hover:border-[#c9c7bd]"
+                    }`}
+                  >
+                    <div className="aspect-square w-full relative rounded-lg overflow-hidden bg-[#faf9f6] flex items-center justify-center">
+                      <img src={opt} alt="Option" className="object-contain max-h-full max-w-full rounded-md" />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          ) : currentQuestion.type === "STORY_ORDER" ? (
+            <div className="space-y-4">
+              <span className="text-[10px] text-[#9a988f] font-bold uppercase tracking-wider block text-center">
+                Drag/Tap images to match correct story sequence:
+              </span>
+              <div className="grid grid-cols-2 gap-4">
+                {storyOrderList.map((opt, idx) => (
+                  <div
+                    key={opt}
+                    className="relative border border-[#e2e0d8] rounded-2xl p-2 bg-white flex flex-col items-center gap-2 shadow-sm"
+                  >
+                    <div className="aspect-square w-full rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center border border-[#e2e0d8]/50">
+                      <img src={opt} alt="Story step" className="object-contain max-h-full max-w-full" />
+                    </div>
+                    
+                    <div className="flex items-center gap-2 w-full justify-between mt-1">
+                      <span className="w-5 h-5 rounded-full bg-[#185fa5] text-white flex items-center justify-center text-[10px] font-bold">
+                        {idx + 1}
+                      </span>
+                      <div className="flex gap-1" style={{ display: isAnswerChecked ? "none" : "flex" }}>
+                        <button
+                          disabled={idx === 0}
+                          onClick={() => {
+                            const copy = [...storyOrderList];
+                            const temp = copy[idx];
+                            copy[idx] = copy[idx - 1];
+                            copy[idx - 1] = temp;
+                            setStoryOrderList(copy);
+                          }}
+                          className="px-2 py-0.5 bg-[#f4f2ec] hover:bg-[#e2e0d8] text-[9px] font-bold rounded cursor-pointer disabled:opacity-30"
+                        >
+                          ◀
+                        </button>
+                        <button
+                          disabled={idx === storyOrderList.length - 1}
+                          onClick={() => {
+                            const copy = [...storyOrderList];
+                            const temp = copy[idx];
+                            copy[idx] = copy[idx + 1];
+                            copy[idx + 1] = temp;
+                            setStoryOrderList(copy);
+                          }}
+                          className="px-2 py-0.5 bg-[#f4f2ec] hover:bg-[#e2e0d8] text-[9px] font-bold rounded cursor-pointer disabled:opacity-30"
+                        >
+                          ▶
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center p-6 bg-white border border-[#e2e0d8] rounded-2xl space-y-4 shadow-sm">
@@ -464,7 +571,10 @@ export default function LessonPage() {
             ) : (
               <button
                 onClick={handleCheckAnswer}
-                disabled={currentQuestion.type === "SELECT" && !selectedOption}
+                disabled={
+                  ((currentQuestion.type === "SELECT" || currentQuestion.type === "LISTEN_IMAGE") && !selectedOption) ||
+                  (currentQuestion.type === "STORY_ORDER" && storyOrderList.length === 0)
+                }
                 className="w-full sm:w-auto px-8 py-3 bg-[#378add] hover:bg-[#185fa5] disabled:opacity-50 text-white font-bold rounded-xl text-xs transition-all cursor-pointer"
               >
                 Check Answer

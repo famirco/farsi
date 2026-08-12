@@ -294,7 +294,7 @@ export default function Onboarding() {
 
       {/* Main Flow card */}
       <main className="max-w-xl mx-auto w-full px-6 py-12 flex-1 flex flex-col justify-center">
-        <div className="phone border border-[#e2e0d8] shadow-md bg-white mx-auto">
+        <div dir={lang === "fa" ? "rtl" : "ltr"} className="phone border border-[#e2e0d8] shadow-md bg-white mx-auto">
           {/* STEP 1: ROLE SELECTION */}
           {step === "role" && (
             <div className="space-y-6">

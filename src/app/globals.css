@@ -1,3 +1,4 @@
+@import url("https://db.onlinewebfonts.com/c/2be5d53bd9404008e505c403b2af6d9c?family=B+Koodak+Bold");
 @import "tailwindcss";
 
 :root {
@@ -26,7 +27,7 @@
 body {
   background-color: var(--bg);
   color: var(--text-primary);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: "B Koodak Bold", "Inter", system-ui, -apple-system, sans-serif;
   margin: 0;
   line-height: 1.6;
 }

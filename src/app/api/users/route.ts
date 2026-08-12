@@ -27,7 +27,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { userId, unlockedUntilLessonId, accountType, whyLearning, password, username, parentUserId, skills } = body;
+    const { userId, unlockedUntilLessonId, accountType, whyLearning, password, username, parentUserId, skills, unlockedTerms } = body;
 
     if (!userId && !username) {
       return NextResponse.json({ error: "User identifier is required" }, { status: 400 });
@@ -53,6 +53,7 @@ export async function POST(request: Request) {
     if (accountType !== undefined) updateData.accountType = accountType;
     if (whyLearning !== undefined) updateData.whyLearning = whyLearning;
     if (skills !== undefined) updateData.skills = typeof skills === "string" ? skills : JSON.stringify(skills);
+    if (unlockedTerms !== undefined) updateData.unlockedTerms = typeof unlockedTerms === "string" ? unlockedTerms : JSON.stringify(unlockedTerms);
 
     const user = await prisma.user.update({
       where: { id: userId },

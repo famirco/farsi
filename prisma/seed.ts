@@ -155,6 +155,39 @@ async function main() {
         promptFa: "حال شما چطور است",
         correctAnswer: "حال شما چطور است",
       },
+      {
+        lessonId: lesson1.id,
+        order: 5,
+        type: "LISTEN_IMAGE",
+        promptEn: "Listen and select the matching image:",
+        promptFa: "سلام",
+        options: JSON.stringify([
+          "/images/hello_greeting.png",
+          "/images/sleeping_night.png",
+          "/images/eating_food.png",
+          "/images/driving_car.png"
+        ]),
+        correctAnswer: "/images/hello_greeting.png",
+      },
+      {
+        lessonId: lesson1.id,
+        order: 6,
+        type: "STORY_ORDER",
+        promptEn: "Listen to the tea making story and arrange the steps in correct sequence:",
+        promptFa: "چای دم کردن روال خاص خود را دارد. ابتدا آب کتری را جوش آورده، چای خشک را در قوری می‌ریزیم، سپس با آب جوش دم کرده و در آخر در فنجان می‌ریزیم و میل می‌کنیم.",
+        options: JSON.stringify([
+          "/images/tea_step1.png",
+          "/images/tea_step2.png",
+          "/images/tea_step3.png",
+          "/images/tea_step4.png"
+        ]),
+        correctAnswer: JSON.stringify([
+          "/images/tea_step1.png",
+          "/images/tea_step2.png",
+          "/images/tea_step3.png",
+          "/images/tea_step4.png"
+        ]),
+      },
     ],
   });
 
