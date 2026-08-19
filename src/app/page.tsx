@@ -93,11 +93,11 @@ export default function Home() {
       feature4Desc: "Track your Listening, Speaking, Reading, and Writing breakdown in real time.",
       methodsTitle: "How Farsiyar Works",
       methodsSub: "A proven 3-step learning system tailored for heritage Persian learners",
-      step1Title: "1. Placement & Assessment",
+      step1Title: "Placement & Assessment",
       step1Desc: "Custom onboarding questionnaire evaluates your background, alphabet knowledge, and home language usage.",
-      step2Title: "2. Daily 5-Minute Micro-Lessons",
+      step2Title: "Daily 5-Minute Micro-Lessons",
       step2Desc: "Complete interactive bite-sized quizzes: image matching, audio stories, sentence ordering, and voice exercises.",
-      step3Title: "3. Real-World Speaking Fluency",
+      step3Title: "Real-World Speaking Fluency",
       step3Desc: "Build confidence to speak comfortably with family members, elders, and native speakers.",
       curriculumTitle: "Structured Course Curriculum",
       curriculumSub: "From absolute foundations to advanced heritage conversation",
@@ -383,19 +383,19 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="bg-[#faf9f6] border border-[#e2e0d8] rounded-2xl p-6 text-center space-y-3">
-              <div className="w-10 h-10 bg-[#e6f1fb] text-[#185fa5] font-bold rounded-full flex items-center justify-center mx-auto text-sm">1</div>
+              <div className="w-10 h-10 bg-[#e6f1fb] text-[#185fa5] font-bold rounded-full flex items-center justify-center mx-auto text-sm">{lang === "fa" ? "۱" : "1"}</div>
               <h3 className="font-bold text-sm text-[#1f1e1c]">{curr.step1Title}</h3>
               <p className="text-xs text-[#6b6a63] leading-relaxed">{curr.step1Desc}</p>
             </div>
 
             <div className="bg-[#faf9f6] border border-[#e2e0d8] rounded-2xl p-6 text-center space-y-3">
-              <div className="w-10 h-10 bg-[#faeeda] text-[#854f0b] font-bold rounded-full flex items-center justify-center mx-auto text-sm">2</div>
+              <div className="w-10 h-10 bg-[#faeeda] text-[#854f0b] font-bold rounded-full flex items-center justify-center mx-auto text-sm">{lang === "fa" ? "۲" : "2"}</div>
               <h3 className="font-bold text-sm text-[#1f1e1c]">{curr.step2Title}</h3>
               <p className="text-xs text-[#6b6a63] leading-relaxed">{curr.step2Desc}</p>
             </div>
 
             <div className="bg-[#faf9f6] border border-[#e2e0d8] rounded-2xl p-6 text-center space-y-3">
-              <div className="w-10 h-10 bg-[#eaf3de] text-[#3b6d11] font-bold rounded-full flex items-center justify-center mx-auto text-sm">3</div>
+              <div className="w-10 h-10 bg-[#eaf3de] text-[#3b6d11] font-bold rounded-full flex items-center justify-center mx-auto text-sm">{lang === "fa" ? "۳" : "3"}</div>
               <h3 className="font-bold text-sm text-[#1f1e1c]">{curr.step3Title}</h3>
               <p className="text-xs text-[#6b6a63] leading-relaxed">{curr.step3Desc}</p>
             </div>
