@@ -15,11 +15,9 @@ Farsiyar is an interactive Persian language learning application built with Next
 - **Database Backup & Restore System:**
   - Export full DB backup as a structured JSON file (`farsiyar_db_backup_YYYY-MM-DD.json`).
   - Transactional import & restore system in Admin Panel (`/admin` under Backup & Restore tab) for terms, levels, lessons, questions, and user progress.
-- **Universal Server-Side Persian TTS Proxy (`/api/tts`):**
-  - Built a dedicated server-side TTS API proxy `/api/tts?text=...` so that Persian speech playback works in high quality across all devices and browsers (including Ubuntu/Linux servers, Chrome, Safari, iOS, and Android) without requiring pre-installed OS voices.
-  - Supports custom uploaded MP3 audio files (`/uploads/...`) for questions as well.
-- **Lesson Question Prompt Styling & RTL Font Alignment:**
-  - Applied `dir="rtl"`, `font-fa`, and proper line heights (`leading-relaxed`) to Persian question/story prompt boxes so punctuation (dots/commas) align correctly and fonts match the site style.
+- **Targeted Question Prompt Formatting (`STORY_ORDER` & `SPEAK`):**
+  - Reverted general questions to clean, standard instruction cards without unnecessary audio boxes.
+  - Restricted the blue audio story box specifically to `STORY_ORDER` (and `SPEAK`) questions with clean `font-fa`, `dir="rtl"`, and proper RTL alignment so the story text renders in the official B Koodak font without punctuation bugs or unwanted proxy sounds.
 
 ## Database & API Routes
 - `prisma/schema.prisma`: Schema using `postgresql` datasource provider.
