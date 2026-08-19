@@ -6,7 +6,6 @@ Farsiyar is an interactive Persian language learning application built with Next
 ## Key Features & Architecture
 - **Multi-Role & Multi-Account System:** Adult Heritage Learners, Parents, and Children.
 - **Term & Level Access Management:** Premium terms locked by default; unlocked per user by Admin checkboxes.
-- **Clean Production Sign-In Card:** Removed testing credentials text section from landing page.
 - **Rich Question Types:**
   - `SELECT`: Multiple choice text questions
   - `SPEAK`: Speech recognition out-loud pronunciation test
