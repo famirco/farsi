@@ -384,9 +384,7 @@ export default function LessonPage() {
           {/* Audio / Instruction Card */}
           <div className="bg-[#f4f2ec] border border-[#e2e0d8] rounded-2xl p-5 shadow-sm space-y-4">
             <h3 className="text-base font-bold leading-relaxed">
-              {lang === "fa" && currentQuestion.promptFa && !currentQuestion.promptFa.startsWith("/uploads/") && currentQuestion.type !== "STORY_ORDER"
-                ? currentQuestion.promptFa
-                : currentQuestion.promptEn}
+              {currentQuestion.promptEn}
             </h3>
 
             {/* Audio player if question has an uploaded MP3 file */}
