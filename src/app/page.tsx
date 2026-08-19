@@ -223,13 +223,7 @@ export default function Home() {
             {lang === "en" ? "New to Farsiyar? Onboarding & Test" : "ثبت‌نام و تعیین سطح جدید"}
           </button>
 
-          {/* Test Accounts Help */}
-          <div className="mt-6 pt-4 border-t border-[#e2e0d8] text-center">
-            <span className="text-[10px] text-[#9a988f] font-semibold uppercase block mb-1">Testing Credentials</span>
-            <p className="text-[11px] text-[#6b6a63] leading-relaxed">
-              {t[lang].helpText}
-            </p>
-          </div>
+
 
           {savedUser && (
             <div className="mt-4 text-center">
