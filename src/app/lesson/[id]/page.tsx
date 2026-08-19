@@ -411,19 +411,12 @@ export default function LessonPage() {
               </div>
             )}
 
-            {/* Special SPEAK Question Audio Player */}
+            {/* Special SPEAK Question Card (No Audio Button) */}
             {currentQuestion.type === "SPEAK" && (
-              <div dir="rtl" className="flex items-center justify-between gap-3 bg-[#e6f1fb] border border-[#378add]/15 p-4 rounded-2xl text-right mt-3">
-                <span className="text-xl font-bold text-[#185fa5] text-right font-fa flex-1">
+              <div dir="rtl" className="bg-[#e6f1fb] border border-[#378add]/15 p-4 sm:p-5 rounded-2xl text-center mt-3">
+                <span className="text-2xl font-bold text-[#185fa5] font-fa">
                   {currentQuestion.correctAnswer}
                 </span>
-                <button
-                  onClick={() => handleTextToSpeech(currentQuestion.correctAnswer)}
-                  className="p-2.5 bg-white hover:bg-[#f4f2ec] border border-[#e2e0d8] rounded-xl transition-all cursor-pointer shrink-0"
-                  title="Listen"
-                >
-                  <Volume2 className="w-5 h-5 text-[#185fa5]" />
-                </button>
               </div>
             )}
           </div>
