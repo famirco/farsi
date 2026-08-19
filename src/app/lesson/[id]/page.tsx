@@ -188,17 +188,15 @@ export default function LessonPage() {
       return;
     }
 
-    // High Quality Server-Side TTS Proxy (works on all browsers & Ubuntu)
-    const ttsUrl = `/api/tts?text=${encodeURIComponent(text)}`;
-    const audio = new Audio(ttsUrl);
-    audio.play().catch(() => {
-      if (typeof window !== "undefined" && "speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = "fa-IR";
-        window.speechSynthesis.speak(utterance);
-      }
-    });
+    if (typeof window !== "undefined" && "speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = "fa-IR";
+      const voices = window.speechSynthesis.getVoices();
+      const voice = voices.find((v) => v.lang.startsWith("fa") || v.lang.includes("IR"));
+      if (voice) utterance.voice = voice;
+      window.speechSynthesis.speak(utterance);
+    }
   };
 
   const verifySpokenAnswer = (spoken: string) => {
@@ -386,32 +384,48 @@ export default function LessonPage() {
           {/* Audio / Instruction Card */}
           <div className="bg-[#f4f2ec] border border-[#e2e0d8] rounded-2xl p-5 shadow-sm space-y-4">
             <h3 className="text-base font-bold leading-relaxed">
-              {lang === "fa" && currentQuestion.promptFa && !currentQuestion.promptFa.startsWith("/uploads/")
+              {lang === "fa" && currentQuestion.promptFa && !currentQuestion.promptFa.startsWith("/uploads/") && currentQuestion.type !== "STORY_ORDER"
                 ? currentQuestion.promptFa
                 : currentQuestion.promptEn}
             </h3>
 
-            {currentQuestion.promptFa && (
-              <div dir="rtl" className="flex items-center gap-3 bg-[#e6f1fb] border border-[#378add]/15 p-4 sm:p-5 rounded-2xl text-right">
-                {currentQuestion.promptFa.startsWith("/uploads/") ? (
-                  <audio controls className="w-full h-10 accent-[#378add]">
-                    <source src={currentQuestion.promptFa} type="audio/mpeg" />
-                    Your browser does not support the audio element.
-                  </audio>
-                ) : (
-                  <>
-                    <div dir="rtl" className="text-sm sm:text-base font-bold text-[#185fa5] flex-1 leading-relaxed text-right font-fa break-words [word-break:break-word]">
-                      {currentQuestion.promptFa}
-                    </div>
-                    <button
-                      onClick={() => handleTextToSpeech(currentQuestion.promptFa)}
-                      className="p-3 bg-white hover:bg-[#f4f2ec] border border-[#e2e0d8] rounded-xl transition-all cursor-pointer shrink-0 shadow-2xs"
-                      title="Listen"
-                    >
-                      <Volume2 className="w-5 h-5 text-[#185fa5]" />
-                    </button>
-                  </>
-                )}
+            {/* Audio player if question has an uploaded MP3 file */}
+            {currentQuestion.promptFa && currentQuestion.promptFa.startsWith("/uploads/") && (
+              <audio controls className="w-full h-10 accent-[#378add] mt-2">
+                <source src={currentQuestion.promptFa} type="audio/mpeg" />
+                Your browser does not support the audio element.
+              </audio>
+            )}
+
+            {/* Special STORY_ORDER Story Card */}
+            {currentQuestion.type === "STORY_ORDER" && currentQuestion.promptFa && !currentQuestion.promptFa.startsWith("/uploads/") && (
+              <div dir="rtl" className="flex items-center gap-3 bg-[#e6f1fb] border border-[#378add]/15 p-4 sm:p-5 rounded-2xl text-right mt-3">
+                <div dir="rtl" className="text-sm sm:text-base font-bold text-[#185fa5] flex-1 leading-relaxed text-right font-fa break-words [word-break:break-word]">
+                  {currentQuestion.promptFa}
+                </div>
+                <button
+                  onClick={() => handleTextToSpeech(currentQuestion.promptFa)}
+                  className="p-3 bg-white hover:bg-[#f4f2ec] border border-[#e2e0d8] rounded-xl transition-all cursor-pointer shrink-0 shadow-2xs"
+                  title="Listen"
+                >
+                  <Volume2 className="w-5 h-5 text-[#185fa5]" />
+                </button>
+              </div>
+            )}
+
+            {/* Special SPEAK Question Audio Player */}
+            {currentQuestion.type === "SPEAK" && (
+              <div dir="rtl" className="flex items-center justify-between gap-3 bg-[#e6f1fb] border border-[#378add]/15 p-4 rounded-2xl text-right mt-3">
+                <span className="text-xl font-bold text-[#185fa5] text-right font-fa flex-1">
+                  {currentQuestion.correctAnswer}
+                </span>
+                <button
+                  onClick={() => handleTextToSpeech(currentQuestion.correctAnswer)}
+                  className="p-2.5 bg-white hover:bg-[#f4f2ec] border border-[#e2e0d8] rounded-xl transition-all cursor-pointer shrink-0"
+                  title="Listen"
+                >
+                  <Volume2 className="w-5 h-5 text-[#185fa5]" />
+                </button>
               </div>
             )}
           </div>
