@@ -9,6 +9,19 @@ export default function Onboarding() {
   const [lang, setLang] = useState<"en" | "fa">("en");
   const [step, setStep] = useState<"role" | "questionnaire" | "test" | "signup" | "result">("role");
 
+  useEffect(() => {
+    const savedLang = localStorage.getItem("farsi_lang");
+    if (savedLang === "fa" || savedLang === "en") {
+      setLang(savedLang);
+    }
+  }, []);
+
+  const toggleLanguage = () => {
+    const nextLang = lang === "en" ? "fa" : "en";
+    setLang(nextLang);
+    localStorage.setItem("farsi_lang", nextLang);
+  };
+
   // Onboarding answers
   const [accountType, setAccountType] = useState<"ADULT_HERITAGE" | "PARENT">("ADULT_HERITAGE");
   const [homeLanguage, setHomeLanguage] = useState("Mostly Persian");
@@ -284,7 +297,7 @@ export default function Onboarding() {
         </div>
 
         <button
-          onClick={() => setLang(lang === "en" ? "fa" : "en")}
+          onClick={toggleLanguage}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-[#e2e0d8] bg-white hover:bg-[#f4f2ec] transition-colors text-[10px] font-semibold"
         >
           <Globe className="w-3 h-3 text-[#185fa5]" />

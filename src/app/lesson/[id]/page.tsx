@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, CheckCircle2, XCircle, Mic, MicOff, Volume2, AlertTriangle } from "lucide-react";
+import { ArrowLeft, CheckCircle2, XCircle, Mic, MicOff, Volume2, AlertTriangle, Globe } from "lucide-react";
 
 interface Question {
   id: string;
@@ -28,8 +28,22 @@ export default function LessonPage() {
   const { id } = useParams();
 
   const [lesson, setLesson] = useState<Lesson | null>(null);
+  const [lang, setLang] = useState<"en" | "fa">("en");
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem("farsi_lang");
+    if (savedLang === "fa" || savedLang === "en") {
+      setLang(savedLang);
+    }
+  }, []);
+
+  const toggleLanguage = () => {
+    const nextLang = lang === "en" ? "fa" : "en";
+    setLang(nextLang);
+    localStorage.setItem("farsi_lang", nextLang);
+  };
   
   // STORY_ORDER specific state
   const [storyOrderList, setStoryOrderList] = useState<string[]>([]);
@@ -360,6 +374,13 @@ export default function LessonPage() {
         <span className="text-[11px] font-bold text-[#6b6a63]">
           {currentQIndex + 1}/{lesson.questions.length}
         </span>
+        <button
+          onClick={toggleLanguage}
+          className="flex items-center gap-1 px-2.5 py-1 rounded-full border border-[#e2e0d8] bg-white hover:bg-[#f4f2ec] transition-colors text-[10px] font-bold"
+        >
+          <Globe className="w-3 h-3 text-[#185fa5]" />
+          <span>{lang === "en" ? "فارسی" : "EN"}</span>
+        </button>
       </header>
 
       {/* Main Quiz Area */}
@@ -368,7 +389,9 @@ export default function LessonPage() {
           {/* Audio / Instruction Card */}
           <div className="bg-[#f4f2ec] border border-[#e2e0d8] rounded-2xl p-5 shadow-sm space-y-4">
             <h3 className="text-base font-bold leading-relaxed">
-              {currentQuestion.promptEn}
+              {lang === "fa" && currentQuestion.promptFa && !currentQuestion.promptFa.startsWith("/uploads/")
+                ? currentQuestion.promptFa
+                : currentQuestion.promptEn}
             </h3>
 
             {currentQuestion.promptFa && (

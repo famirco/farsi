@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Flame, Star, Award, CheckCircle2, Lock, User, PlusCircle, Sparkles, BookOpen, Plus, Heart, GraduationCap, ShieldAlert } from "lucide-react";
+import { Flame, Star, Award, CheckCircle2, Lock, User, PlusCircle, Sparkles, BookOpen, Plus, Heart, GraduationCap, ShieldAlert, Globe } from "lucide-react";
 
 interface Term {
   id: string;
@@ -50,11 +50,25 @@ interface UserProfile {
 
 export default function Dashboard() {
   const router = useRouter();
+  const [lang, setLang] = useState<"en" | "fa">("en");
   const [user, setUser] = useState<UserProfile | null>(null);
   const [terms, setTerms] = useState<Term[]>([]);
   const [completedIds, setCompletedIds] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [flatLessons, setFlatLessons] = useState<Lesson[]>([]);
+
+  useEffect(() => {
+    const savedLang = localStorage.getItem("farsi_lang");
+    if (savedLang === "fa" || savedLang === "en") {
+      setLang(savedLang);
+    }
+  }, []);
+
+  const toggleLanguage = () => {
+    const nextLang = lang === "en" ? "fa" : "en";
+    setLang(nextLang);
+    localStorage.setItem("farsi_lang", nextLang);
+  };
 
   // Parent states
   const [children, setChildren] = useState<UserProfile[]>([]);
@@ -452,6 +466,14 @@ export default function Dashboard() {
             )}
 
             <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-[#e2e0d8] bg-white hover:bg-[#f4f2ec] transition-colors text-xs font-semibold"
+            >
+              <Globe className="w-3.5 h-3.5 text-[#185fa5]" />
+              <span>{lang === "en" ? "فارسی" : "English"}</span>
+            </button>
+
+            <button
               onClick={handleLogout}
               className="flex items-center gap-1 text-[#6b6a63] hover:text-[#1f1e1c] transition-colors text-xs font-semibold"
             >
@@ -575,10 +597,10 @@ export default function Dashboard() {
                 )}
                 <div className="border-b border-[#e2e0d8] pb-3 mb-6">
                   <span className="text-[10px] bg-[#e6f1fb] text-[#185fa5] px-2 py-0.5 rounded-full border border-[#378add]/15 font-bold uppercase tracking-wider">
-                    Term {term.order}
+                    {lang === "fa" ? `ترم ${term.order}` : `Term ${term.order}`}
                   </span>
-                  <h2 className="text-lg font-bold text-[#1f1e1c] mt-1">{term.titleEn}</h2>
-                  <p className="text-xs text-[#6b6a63]">{term.titleFa}</p>
+                  <h2 className="text-lg font-bold text-[#1f1e1c] mt-1">{lang === "fa" ? term.titleFa : term.titleEn}</h2>
+                  <p className="text-xs text-[#6b6a63]">{lang === "fa" ? term.titleEn : term.titleFa}</p>
                 </div>
 
                 <div className="space-y-8">
@@ -586,10 +608,10 @@ export default function Dashboard() {
                   <div key={level.id} className="space-y-6">
                     <div className="bg-[#f4f2ec] px-4 py-2 rounded-xl border border-[#e2e0d8] flex justify-between items-center">
                       <div>
-                        <span className="text-[10px] font-bold text-[#6b6a63]">LEVEL {level.order}</span>
-                        <h3 className="text-xs font-bold text-[#1f1e1c]">{level.titleEn}</h3>
+                        <span className="text-[10px] font-bold text-[#6b6a63]">{lang === "fa" ? `سطح ${level.order}` : `LEVEL ${level.order}`}</span>
+                        <h3 className="text-xs font-bold text-[#1f1e1c]">{lang === "fa" ? level.titleFa : level.titleEn}</h3>
                       </div>
-                      <span className="text-[10px] text-gray-500 font-bold">{level.titleFa}</span>
+                      <span className="text-[10px] text-gray-500 font-bold">{lang === "fa" ? level.titleEn : level.titleFa}</span>
                     </div>
 
                     <div className="flex flex-col items-center gap-10 relative py-2">

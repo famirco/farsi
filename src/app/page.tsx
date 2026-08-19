@@ -18,7 +18,17 @@ export default function Home() {
     if (user) {
       setSavedUser(user);
     }
+    const savedLang = localStorage.getItem("farsi_lang");
+    if (savedLang === "fa" || savedLang === "en") {
+      setLang(savedLang);
+    }
   }, []);
+
+  const toggleLanguage = () => {
+    const nextLang = lang === "en" ? "fa" : "en";
+    setLang(nextLang);
+    localStorage.setItem("farsi_lang", nextLang);
+  };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -100,7 +110,7 @@ export default function Home() {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={() => setLang(lang === "en" ? "fa" : "en")}
+              onClick={toggleLanguage}
               className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-[#e2e0d8] bg-white hover:bg-[#f4f2ec] transition-colors text-xs font-semibold"
             >
               <Globe className="w-3.5 h-3.5 text-[#185fa5]" />
