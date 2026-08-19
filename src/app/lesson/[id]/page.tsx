@@ -164,6 +164,12 @@ export default function LessonPage() {
   };
 
   const handleTextToSpeech = (text: string) => {
+    if (!text) return;
+    if (text.startsWith("/uploads/") || text.startsWith("http")) {
+      const audio = new Audio(text);
+      audio.play().catch((e) => console.error("Audio play error", e));
+      return;
+    }
     const cleanText = text.trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()?؟]/g, "");
 
     if (cleanText === "سلام") {
@@ -182,26 +188,17 @@ export default function LessonPage() {
       return;
     }
 
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = "fa-IR";
-
-      const speak = () => {
-        const voices = window.speechSynthesis.getVoices();
-        const voice = voices.find((v) => v.lang.startsWith("fa") || v.lang.includes("IR"));
-        if (voice) {
-          utterance.voice = voice;
-        }
+    // High Quality Server-Side TTS Proxy (works on all browsers & Ubuntu)
+    const ttsUrl = `/api/tts?text=${encodeURIComponent(text)}`;
+    const audio = new Audio(ttsUrl);
+    audio.play().catch(() => {
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = "fa-IR";
         window.speechSynthesis.speak(utterance);
-      };
-
-      if (window.speechSynthesis.getVoices().length === 0) {
-        window.speechSynthesis.onvoiceschanged = speak;
-      } else {
-        speak();
       }
-    }
+    });
   };
 
   const verifySpokenAnswer = (spoken: string) => {
@@ -395,7 +392,7 @@ export default function LessonPage() {
             </h3>
 
             {currentQuestion.promptFa && (
-              <div className="flex items-center gap-3 bg-[#e6f1fb] border border-[#378add]/10 p-4 rounded-xl">
+              <div dir="rtl" className="flex items-center gap-3 bg-[#e6f1fb] border border-[#378add]/15 p-4 sm:p-5 rounded-2xl text-right">
                 {currentQuestion.promptFa.startsWith("/uploads/") ? (
                   <audio controls className="w-full h-10 accent-[#378add]">
                     <source src={currentQuestion.promptFa} type="audio/mpeg" />
@@ -403,15 +400,15 @@ export default function LessonPage() {
                   </audio>
                 ) : (
                   <>
-                    <span className="text-2xl font-bold text-[#185fa5] dir-rtl flex-1">
+                    <div dir="rtl" className="text-sm sm:text-base font-bold text-[#185fa5] flex-1 leading-relaxed text-right font-fa break-words [word-break:break-word]">
                       {currentQuestion.promptFa}
-                    </span>
+                    </div>
                     <button
                       onClick={() => handleTextToSpeech(currentQuestion.promptFa)}
-                      className="p-2 bg-white hover:bg-[#f4f2ec] border border-[#e2e0d8] rounded-lg transition-all cursor-pointer"
+                      className="p-3 bg-white hover:bg-[#f4f2ec] border border-[#e2e0d8] rounded-xl transition-all cursor-pointer shrink-0 shadow-2xs"
                       title="Listen"
                     >
-                      <Volume2 className="w-4 h-4 text-[#185fa5]" />
+                      <Volume2 className="w-5 h-5 text-[#185fa5]" />
                     </button>
                   </>
                 )}
