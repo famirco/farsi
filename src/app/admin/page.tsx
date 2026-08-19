@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Plus, ListPlus, LayoutGrid, Info, Settings, Users, Layers, BookOpen, Check } from "lucide-react";
+import { ArrowLeft, Plus, ListPlus, LayoutGrid, Info, Settings, Users, Layers, BookOpen, Check, Database, Download, Upload, RefreshCw, HardDriveUpload, FileJson, AlertCircle, CheckCircle2 } from "lucide-react";
 
 interface Term {
   id: string;
@@ -59,7 +59,11 @@ interface UserProfile {
 
 export default function AdminPanel() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"users" | "terms" | "lessons">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "terms" | "lessons" | "backup">("users");
+  const [isRestoring, setIsRestoring] = useState(false);
+  const [backupFile, setBackupFile] = useState<File | null>(null);
+  const [backupPreview, setBackupPreview] = useState<any>(null);
+  const [backupMessage, setBackupMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   // Master Data
   const [terms, setTerms] = useState<Term[]>([]);
@@ -536,6 +540,15 @@ export default function AdminPanel() {
             >
               <BookOpen className="w-3.5 h-3.5" />
               <span>Lessons & Questions</span>
+            </button>
+            <button
+              onClick={() => setActiveTab("backup")}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "backup" ? "bg-white text-[#1f1e1c] shadow-sm" : "text-[#6b6a63]"
+              }`}
+            >
+              <Database className="w-3.5 h-3.5" />
+              <span>Backup & Restore</span>
             </button>
           </div>
         </div>
@@ -1154,6 +1167,186 @@ export default function AdminPanel() {
                   </div>
                 </div>
               )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 4: BACKUP & RESTORE */}
+        {activeTab === "backup" && (
+          <div className="space-y-6">
+            {/* Header Description */}
+            <div className="bg-white border border-[#e2e0d8] rounded-3xl p-6 shadow-sm">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2.5 bg-blue-50 text-[#378add] rounded-2xl">
+                  <Database className="w-6 h-6" />
+                </div>
+                <div>
+                  <h2 className="text-base font-bold text-[#1f1e1c]">Database Backup & Restore System</h2>
+                  <p className="text-xs text-[#6b6a63]">پشتیبان‌گیری کامل از داده‌ها (کاربران، ترم‌ها، سطح‌ها، درس‌ها و سوالات) و بازگردانی دیتابیس</p>
+                </div>
+              </div>
+            </div>
+
+            {backupMessage && (
+              <div className={`p-4 rounded-2xl border text-xs font-semibold flex items-center gap-2.5 ${
+                backupMessage.type === "success" 
+                  ? "bg-[#eaf3de] border-[#3b6d11]/30 text-[#3b6d11]" 
+                  : "bg-red-50 border-red-200 text-red-700"
+              }`}>
+                {backupMessage.type === "success" ? <CheckCircle2 className="w-4 h-4 shrink-0" /> : <AlertCircle className="w-4 h-4 shrink-0" />}
+                <span>{backupMessage.text}</span>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Export Backup Card */}
+              <div className="bg-white border border-[#e2e0d8] rounded-3xl p-6 shadow-sm space-y-4 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Download className="w-5 h-5 text-[#378add]" />
+                      <h3 className="font-bold text-sm text-[#1f1e1c]">دانلود نسخه پشتیبان (Export)</h3>
+                    </div>
+                    <span className="text-[10px] bg-[#e6f1fb] text-[#185fa5] px-2 py-0.5 rounded-full font-bold">JSON Format</span>
+                  </div>
+                  <p className="text-xs text-[#6b6a63] leading-relaxed mb-4">
+                    یک خروجی کامل و استاندارد در قالب یک فایل JSON دانلود کنید. این فایل شامل تمام داده‌های وارد شده شامل ترم‌ها، دروس، سوالات و کاربران همراه با وضعیت پیشرفت آن‌هاست.
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs bg-[#faf9f6] p-3 rounded-2xl border border-[#e2e0d8] mb-4">
+                    <div><span className="text-[#6b6a63]">تعداد ترم‌ها:</span> <strong className="text-[#1f1e1c]">{terms.length}</strong></div>
+                    <div><span className="text-[#6b6a63]">تعداد درس‌ها:</span> <strong className="text-[#1f1e1c]">{allLessons.length}</strong></div>
+                    <div><span className="text-[#6b6a63]">تعداد کاربران:</span> <strong className="text-[#1f1e1c]">{users.length}</strong></div>
+                    <div><span className="text-[#6b6a63]">تاریخ خروجی:</span> <strong className="text-[#1f1e1c]">{new Date().toLocaleDateString('fa-IR')}</strong></div>
+                  </div>
+                </div>
+
+                <a
+                  href="/api/admin/backup"
+                  download
+                  className="w-full py-3 bg-[#378add] hover:bg-[#185fa5] text-white rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-sm text-center"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>دانلود فایل پشتیبان (Export Backup)</span>
+                </a>
+              </div>
+
+              {/* Import / Restore Backup Card */}
+              <div className="bg-white border border-[#e2e0d8] rounded-3xl p-6 shadow-sm space-y-4 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <HardDriveUpload className="w-5 h-5 text-[#ba7517]" />
+                      <h3 className="font-bold text-sm text-[#1f1e1c]">بازگردانی دیتابیس (Import & Restore)</h3>
+                    </div>
+                    <span className="text-[10px] bg-[#faeeda] text-[#854f0b] px-2 py-0.5 rounded-full font-bold">Restore</span>
+                  </div>
+                  <p className="text-xs text-[#6b6a63] leading-relaxed mb-4">
+                    فایل پشتیبان (با پسوند <code className="bg-gray-100 px-1 rounded">.json</code>) را انتخاب کنید تا اطلاعات قبلی دیتابیس با موفقیت بازگردانی شوند.
+                  </p>
+
+                  <div className="space-y-3 mb-4">
+                    <label className="block w-full border-2 border-dashed border-[#c9c7bd] hover:border-[#378add] bg-[#faf9f6] p-4 rounded-2xl text-center cursor-pointer transition-all">
+                      <FileJson className="w-8 h-8 text-[#6b6a63] mx-auto mb-1" />
+                      <span className="text-xs font-bold text-[#1f1e1c] block">
+                        {backupFile ? backupFile.name : "انتخاب فایل پشتیبان JSON"}
+                      </span>
+                      <span className="text-[10px] text-[#6b6a63] block mt-0.5">برای آپلود فایل کلیک کنید</span>
+                      <input
+                        type="file"
+                        accept=".json,application/json"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          setBackupFile(file);
+                          setBackupMessage(null);
+
+                          const reader = new FileReader();
+                          reader.onload = (event) => {
+                            try {
+                              const json = JSON.parse(event.target?.result as string);
+                              setBackupPreview(json);
+                            } catch (err) {
+                              setBackupMessage({ type: "error", text: "فرمت فایل نامعتبر است. فایل JSON پشتیبان انتخاب کنید." });
+                              setBackupPreview(null);
+                            }
+                          };
+                          reader.readAsText(file);
+                        }}
+                        className="hidden"
+                      />
+                    </label>
+
+                    {backupPreview && (
+                      <div className="bg-[#f4f2ec] p-3 rounded-2xl text-xs space-y-1 text-[#1f1e1c]">
+                        <div className="font-bold text-[11px] text-[#378add] mb-1">پیش‌نمایش محتوای فایل:</div>
+                        {backupPreview.counts && (
+                          <div className="grid grid-cols-2 gap-1 text-[11px] text-[#6b6a63]">
+                            <div>ترم‌ها: <strong>{backupPreview.counts.terms ?? backupPreview.data?.terms?.length ?? 0}</strong></div>
+                            <div>درس‌ها: <strong>{backupPreview.counts.lessons ?? backupPreview.data?.lessons?.length ?? 0}</strong></div>
+                            <div>سوالات: <strong>{backupPreview.counts.questions ?? backupPreview.data?.questions?.length ?? 0}</strong></div>
+                            <div>کاربران: <strong>{backupPreview.counts.users ?? backupPreview.data?.users?.length ?? 0}</strong></div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!backupPreview) return;
+                    if (!confirm("آیا مطمئن هستید؟ با بازگردانی نسخه پشتیبان، تمام اطلاعات فعلی دیتابیس جایگزین خواهند شد.")) return;
+
+                    setIsRestoring(true);
+                    setBackupMessage(null);
+
+                    try {
+                      const res = await fetch("/api/admin/backup", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(backupPreview),
+                      });
+
+                      const data = await res.json();
+                      if (res.ok) {
+                        setBackupMessage({ type: "success", text: `دیتابیس با موفقیت بازگردانی شد! (${data.restoredCounts?.terms || 0} ترم، ${data.restoredCounts?.lessons || 0} درس، ${data.restoredCounts?.questions || 0} سوال، ${data.restoredCounts?.users || 0} کاربر)` });
+                        setBackupFile(null);
+                        setBackupPreview(null);
+                        reloadTermsAndLessons();
+                        const uRes = await fetch("/api/users");
+                        if (uRes.ok) setUsers(await uRes.json());
+                      } else {
+                        setBackupMessage({ type: "error", text: data.error || "خطا در بازگردانی دیتابیس." });
+                      }
+                    } catch (err: any) {
+                      console.error(err);
+                      setBackupMessage({ type: "error", text: "خطا در برقراری ارتباط با سرور." });
+                    } finally {
+                      setIsRestoring(false);
+                    }
+                  }}
+                  disabled={!backupPreview || isRestoring}
+                  className={`w-full py-3 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-sm ${
+                    !backupPreview || isRestoring
+                      ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                      : "bg-[#1f1e1c] hover:bg-black text-white cursor-pointer"
+                  }`}
+                >
+                  {isRestoring ? (
+                    <>
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      <span>در حال بازگردانی دیتابیس...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="w-4 h-4" />
+                      <span>بازگردانی کامل اطلاعات (Restore)</span>
+                    </>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         )}
