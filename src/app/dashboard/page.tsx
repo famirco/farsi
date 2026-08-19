@@ -435,22 +435,22 @@ export default function Dashboard() {
   // ADULT HERITAGE DASHBOARD VIEW (Original / Default)
   // ----------------------------------------------------
   return (
-    <div className="flex-1 bg-[#faf9f6] text-[#1f1e1c] min-h-screen pb-20">
+    <div className="flex-1 bg-[#faf9f6] text-[#1f1e1c] min-h-screen pb-24" dir={lang === "fa" ? "rtl" : "ltr"}>
       {/* Header */}
-      <header className="border-b border-[#e2e0d8] bg-white sticky top-0 z-30 shadow-sm">
-        <div className="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
-          <Link href="/" className="flex items-center gap-2 group">
+      <header className="border-b border-[#e2e0d8] bg-white/90 backdrop-blur-md sticky top-0 z-30 shadow-sm">
+        <div className="max-w-6xl mx-auto px-6 py-3.5 flex justify-between items-center">
+          <Link href="/" className="flex items-center gap-2.5 group">
             <img src="/logo.png" alt="Farsiyar Logo" className="w-8 h-8 object-contain" style={{ mixBlendMode: "multiply" }} />
-            <span className="font-bold text-[#1f1e1c] text-lg">Farsiyar</span>
+            <span className="font-bold text-[#1f1e1c] text-lg tracking-tight">Farsiyar</span>
           </Link>
 
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-[#faeeda] rounded-full border border-[#ba7517]/20 text-[#854f0b] font-bold text-xs">
-              <Flame className="w-4 h-4 fill-[#ba7517]" />
-              <span>{user?.streak || 0} days</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-[#faeeda] rounded-full border border-[#ba7517]/20 text-[#854f0b] font-bold text-xs shadow-2xs">
+              <Flame className="w-4 h-4 fill-[#ba7517] animate-pulse" />
+              <span>{user?.streak || 0} {lang === "fa" ? "روز متوالی" : "days streak"}</span>
             </div>
 
-            <div className="flex items-center gap-1.5 px-3 py-1 bg-[#e6f1fb] rounded-full border border-[#378add]/20 text-[#185fa5] font-bold text-xs">
+            <div className="flex items-center gap-1.5 px-3 py-1 bg-[#e6f1fb] rounded-full border border-[#378add]/20 text-[#185fa5] font-bold text-xs shadow-2xs">
               <Star className="w-4 h-4 fill-[#378add]" />
               <span>{user?.xp || 0} XP</span>
             </div>
@@ -458,16 +458,16 @@ export default function Dashboard() {
             {user?.role === "ADMIN" && (
               <Link
                 href="/admin"
-                className="flex items-center gap-1 px-3 py-1 bg-purple-50 hover:bg-purple-100 rounded-full border border-purple-200 text-purple-700 font-bold text-xs transition-all"
+                className="flex items-center gap-1.5 px-3.5 py-1 bg-purple-50 hover:bg-purple-100 rounded-full border border-purple-200 text-purple-700 font-bold text-xs transition-all shadow-2xs"
               >
                 <PlusCircle className="w-3.5 h-3.5" />
-                <span>Admin</span>
+                <span>{lang === "fa" ? "مدیریت" : "Admin Panel"}</span>
               </Link>
             )}
 
             <button
               onClick={toggleLanguage}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-[#e2e0d8] bg-white hover:bg-[#f4f2ec] transition-colors text-xs font-semibold"
+              className="flex items-center gap-1.5 px-3.5 py-1 rounded-full border border-[#e2e0d8] bg-white hover:bg-[#f4f2ec] transition-colors text-xs font-semibold shadow-2xs cursor-pointer"
             >
               <Globe className="w-3.5 h-3.5 text-[#185fa5]" />
               <span>{lang === "en" ? "فارسی" : "English"}</span>
@@ -475,90 +475,104 @@ export default function Dashboard() {
 
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1 text-[#6b6a63] hover:text-[#1f1e1c] transition-colors text-xs font-semibold"
+              className="flex items-center gap-1.5 text-[#6b6a63] hover:text-[#1f1e1c] transition-colors text-xs font-semibold px-2 py-1 rounded-lg hover:bg-[#f4f2ec] cursor-pointer"
             >
               <User className="w-3.5 h-3.5" />
-              <span>{user?.username} (Logout)</span>
+              <span>{user?.username} ({lang === "fa" ? "خروج" : "Logout"})</span>
             </button>
           </div>
         </div>
       </header>
 
       {/* Main Container */}
-      <main className="max-w-4xl mx-auto px-6 pt-10 grid grid-cols-1 md:grid-cols-3 gap-8">
-        {/* Left Column: Profile Card */}
-        <div className="md:col-span-1 space-y-6">
-          <div className="border border-[#e2e0d8] shadow-sm bg-white rounded-[26px] p-6 w-full">
-            <div className="flex items-center justify-between mb-4 pb-4 border-b border-[#e2e0d8]">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#e6f1fb] flex items-center justify-center font-bold text-[#185fa5] uppercase">
+      <main className="max-w-6xl mx-auto px-6 pt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Left Column (Sidebar): Profile, Skills, Today's Practice & Certificates */}
+        <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-20 lg:self-start">
+          {/* Main User Card */}
+          <div className="border border-[#e2e0d8] shadow-sm bg-white rounded-3xl p-6 relative overflow-hidden">
+            <div className="flex items-start justify-between mb-4 pb-4 border-b border-[#e2e0d8]">
+              <div className="flex items-center gap-3.5">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#378add] to-[#185fa5] flex items-center justify-center font-bold text-white text-lg shadow-md uppercase">
                   {user?.username ? user.username.charAt(0) : "U"}
                 </div>
                 <div>
-                  <p className="margin:0 font-bold text-sm">{user?.username}</p>
-                  <p className="margin:0 text-[11px] text-[#6b6a63]">Heritage learner · Since March 2025</p>
+                  <h3 className="font-bold text-base text-[#1f1e1c] leading-snug">{user?.username}</h3>
+                  <p className="text-[11px] text-[#6b6a63] font-medium">
+                    {lang === "fa" ? "زبان‌آموز فارسی · عضویت ۲۰۲۵" : "Heritage learner · Member 2025"}
+                  </p>
                 </div>
               </div>
-              <span className="badge bg-[#faeeda] text-[#854f0b]">🔥 {user?.streak || 0} days</span>
             </div>
 
-            {/* Why I'm learning motivational card */}
+            {/* Motivational Quote */}
             {user?.whyLearning && (
-              <div className="bg-[#f4f2ec] rounded-2xl p-4 mb-4 border border-[#e2e0d8] text-center">
-                <p className="text-[10px] text-[#9a988f] font-bold uppercase tracking-wider mb-1">Why I'm learning</p>
-                <p className="text-xs text-[#6b6a63] italic leading-relaxed">
+              <div className="bg-[#f4f2ec] rounded-2xl p-4 mb-4 border border-[#e2e0d8] text-center relative">
+                <p className="text-[10px] text-[#9a988f] font-bold uppercase tracking-wider mb-1">
+                  {lang === "fa" ? "هدف من از یادگیری" : "Why I'm learning"}
+                </p>
+                <p className="text-xs text-[#1f1e1c] font-medium italic leading-relaxed">
                   "{user.whyLearning}"
                 </p>
               </div>
             )}
 
             {/* Skill Profile Bars */}
-            <div className="bg-[#f4f2ec] rounded-2xl p-4 mb-4 border border-[#e2e0d8]">
-              <p className="margin:0 0 10px text-xs font-bold text-[#6b6a63]">Skill Profile</p>
-              
-              <div className="mb-3">
-                <div className="flex justify-between text-[11px] font-semibold mb-1">
-                  <span>Listening</span>
-                  <span>{parsedSkills.listening}%</span>
-                </div>
-                <div className="bar">
-                  <div className="bar-fill" style={{ width: `${parsedSkills.listening}%`, backgroundColor: "var(--success-fill)" }} />
-                </div>
+            <div className="bg-[#faf9f6] rounded-2xl p-4 border border-[#e2e0d8] space-y-3">
+              <div className="flex justify-between items-center text-xs font-bold text-[#1f1e1c] mb-1">
+                <span>{lang === "fa" ? "پروفایل مهارت‌ها" : "Skill Profile"}</span>
+                <Sparkles className="w-3.5 h-3.5 text-[#ba7517]" />
               </div>
-
-              <div className="mb-3">
-                <div className="flex justify-between text-[11px] font-semibold mb-1">
-                  <span>Speaking</span>
-                  <span>{parsedSkills.speaking}%</span>
+              
+              <div>
+                <div className="flex justify-between text-[11px] font-semibold text-[#6b6a63] mb-1">
+                  <span>{lang === "fa" ? "شنیداری (Listening)" : "Listening"}</span>
+                  <span className="font-bold text-[#1f1e1c]">{parsedSkills.listening}%</span>
                 </div>
-                <div className="bar">
-                  <div className="bar-fill" style={{ width: `${parsedSkills.speaking}%`, backgroundColor: "var(--warning-fill)" }} />
+                <div className="h-2 w-full bg-[#e2e0d8] rounded-full overflow-hidden">
+                  <div className="h-full bg-emerald-500 rounded-full transition-all duration-500" style={{ width: `${parsedSkills.listening}%` }} />
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between text-[11px] font-semibold mb-1">
-                  <span>Reading</span>
-                  <span>{parsedSkills.reading}%</span>
+                <div className="flex justify-between text-[11px] font-semibold text-[#6b6a63] mb-1">
+                  <span>{lang === "fa" ? "گفتاری (Speaking)" : "Speaking"}</span>
+                  <span className="font-bold text-[#1f1e1c]">{parsedSkills.speaking}%</span>
                 </div>
-                <div className="bar">
-                  <div className="bar-fill" style={{ width: `${parsedSkills.reading}%`, backgroundColor: "var(--accent-fill)" }} />
+                <div className="h-2 w-full bg-[#e2e0d8] rounded-full overflow-hidden">
+                  <div className="h-full bg-amber-500 rounded-full transition-all duration-500" style={{ width: `${parsedSkills.speaking}%` }} />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-[11px] font-semibold text-[#6b6a63] mb-1">
+                  <span>{lang === "fa" ? "خوانداری (Reading)" : "Reading"}</span>
+                  <span className="font-bold text-[#1f1e1c]">{parsedSkills.reading}%</span>
+                </div>
+                <div className="h-2 w-full bg-[#e2e0d8] rounded-full overflow-hidden">
+                  <div className="h-full bg-[#378add] rounded-full transition-all duration-500" style={{ width: `${parsedSkills.reading}%` }} />
                 </div>
               </div>
             </div>
 
-            {/* Today's Practice Card */}
+            {/* Today's Practice Action Banner */}
             {currentPracticeLesson && (
-              <div className="bg-[#e6f1fb] rounded-2xl p-4 border border-[#378add]/10">
-                <p className="text-[11px] text-[#185fa5] font-bold uppercase tracking-wider mb-1">Today's Practice</p>
+              <div className="mt-4 bg-[#e6f1fb] rounded-2xl p-4 border border-[#378add]/20 shadow-xs">
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[10px] text-[#185fa5] font-bold uppercase tracking-wider">
+                    {lang === "fa" ? "تمرین امروز" : "Today's Practice"}
+                  </span>
+                  <span className="text-[10px] bg-[#378add] text-white px-2 py-0.5 rounded-full font-bold">
+                    +{currentPracticeLesson.xpReward} XP
+                  </span>
+                </div>
                 <p className="font-bold text-sm text-[#1f1e1c] mb-3">
-                  Lesson {currentPracticeLesson.order}: {currentPracticeLesson.titleEn}
+                  {lang === "fa" ? `درس ${currentPracticeLesson.order}: ${currentPracticeLesson.titleFa}` : `Lesson ${currentPracticeLesson.order}: ${currentPracticeLesson.titleEn}`}
                 </p>
                 <Link
                   href={`/lesson/${currentPracticeLesson.id}`}
-                  className="block w-full py-2 bg-[#1f1e1c] hover:bg-black text-white text-center rounded-xl text-xs font-semibold transition-all"
+                  className="block w-full py-2.5 bg-[#1f1e1c] hover:bg-black text-white text-center rounded-xl text-xs font-bold transition-all shadow-sm"
                 >
-                  Start Practice
+                  {lang === "fa" ? "شروع تمرین" : "Start Practice"}
                 </Link>
               </div>
             )}
@@ -566,125 +580,183 @@ export default function Dashboard() {
 
           {/* Certificates Card */}
           <div className="bg-white border border-[#e2e0d8] rounded-3xl p-5 shadow-sm space-y-3">
-            <h4 className="font-bold text-xs text-[#1f1e1c]">My Certificates</h4>
-            <div className="flex items-center gap-3 p-3 bg-[#f4f2ec] rounded-2xl border border-[#e2e0d8]">
-              <div className="p-2 bg-[#e6f1fb] text-[#185fa5] rounded-xl"><GraduationCap className="w-5 h-5" /></div>
+            <h4 className="font-bold text-xs text-[#1f1e1c]">
+              {lang === "fa" ? "گواهینامه‌های من" : "My Certificates"}
+            </h4>
+            <div className="flex items-center gap-3 p-3 bg-[#faf9f6] rounded-2xl border border-[#e2e0d8]">
+              <div className="p-2.5 bg-[#e6f1fb] text-[#185fa5] rounded-xl shrink-0"><GraduationCap className="w-5 h-5" /></div>
               <div>
-                <p className="font-bold text-xs text-[#1f1e1c]">Foundations Completed</p>
-                <p className="text-[10px] text-[#6b6a63]">Earned June 2025</p>
+                <p className="font-bold text-xs text-[#1f1e1c]">
+                  {lang === "fa" ? "پایان دوره مقدماتی" : "Foundations Completed"}
+                </p>
+                <p className="text-[10px] text-[#6b6a63]">
+                  {lang === "fa" ? "دریافت شده در ۲۰۲۵" : "Earned June 2025"}
+                </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Learning Path */}
-        <div className="md:col-span-2 space-y-8">
+        {/* Right Column: Interactive Learning Roadmap */}
+        <div className="lg:col-span-8 space-y-8">
           {terms.map((term) => {
             const isTermUnlocked = checkIsTermUnlocked(term.order, term.id);
+            
+            // Calculate term progress
+            const termLessonIds = term.levels.flatMap(l => l.lessons.map(ls => ls.id));
+            const completedCount = termLessonIds.filter(id => completedIds.includes(id)).length;
+            const progressPercent = termLessonIds.length > 0 ? Math.round((completedCount / termLessonIds.length) * 100) : 0;
+
             return (
-              <div key={term.id} className="bg-white border border-[#e2e0d8] rounded-3xl p-6 shadow-sm relative overflow-hidden">
+              <div key={term.id} className="bg-white border border-[#e2e0d8] rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden">
                 {/* Lock Overlay if term is premium and not unlocked */}
                 {!isTermUnlocked && (
-                  <div className="absolute inset-0 bg-[#faf9f6]/90 backdrop-blur-[1px] z-20 flex flex-col items-center justify-center p-6 text-center">
-                    <div className="w-11 h-11 bg-[#faeeda] rounded-full flex items-center justify-center text-[#854f0b] border border-[#ba7517]/10 mb-3 shadow-sm">
-                      <Lock className="w-4 h-4" />
+                  <div className="absolute inset-0 bg-[#faf9f6]/92 backdrop-blur-[2px] z-20 flex flex-col items-center justify-center p-6 text-center">
+                    <div className="w-12 h-12 bg-[#faeeda] rounded-full flex items-center justify-center text-[#854f0b] border border-[#ba7517]/20 mb-3 shadow-md">
+                      <Lock className="w-5 h-5" />
                     </div>
-                    <p className="font-bold text-sm text-[#1f1e1c]">Premium Term - Locked</p>
-                    <p className="text-[11px] text-[#6b6a63] mt-1 max-w-[280px]">
-                      This term requires package activation. Contact admin to unlock this course content.
+                    <p className="font-bold text-base text-[#1f1e1c]">
+                      {lang === "fa" ? "ترم ویژه - قفل شده" : "Premium Term - Locked"}
+                    </p>
+                    <p className="text-xs text-[#6b6a63] mt-1.5 max-w-[320px] leading-relaxed">
+                      {lang === "fa" 
+                        ? "این ترم نیاز به فعال‌سازی اشتراک دارد. جهت دسترسی با مدیریت تماس بگیرید." 
+                        : "This term requires package activation. Contact admin to unlock this course content."}
                     </p>
                   </div>
                 )}
-                <div className="border-b border-[#e2e0d8] pb-3 mb-6">
-                  <span className="text-[10px] bg-[#e6f1fb] text-[#185fa5] px-2 py-0.5 rounded-full border border-[#378add]/15 font-bold uppercase tracking-wider">
-                    {lang === "fa" ? `ترم ${term.order}` : `Term ${term.order}`}
-                  </span>
-                  <h2 className="text-lg font-bold text-[#1f1e1c] mt-1">{lang === "fa" ? term.titleFa : term.titleEn}</h2>
-                  <p className="text-xs text-[#6b6a63]">{lang === "fa" ? term.titleEn : term.titleFa}</p>
-                </div>
 
-                <div className="space-y-8">
-                {term.levels.map((level) => (
-                  <div key={level.id} className="space-y-6">
-                    <div className="bg-[#f4f2ec] px-4 py-2 rounded-xl border border-[#e2e0d8] flex justify-between items-center">
-                      <div>
-                        <span className="text-[10px] font-bold text-[#6b6a63]">{lang === "fa" ? `سطح ${level.order}` : `LEVEL ${level.order}`}</span>
-                        <h3 className="text-xs font-bold text-[#1f1e1c]">{lang === "fa" ? level.titleFa : level.titleEn}</h3>
-                      </div>
-                      <span className="text-[10px] text-gray-500 font-bold">{lang === "fa" ? level.titleEn : level.titleFa}</span>
+                {/* Term Header & Progress Banner */}
+                <div className="border-b border-[#e2e0d8] pb-5 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <span className="text-[10px] bg-[#e6f1fb] text-[#185fa5] px-2.5 py-0.5 rounded-full border border-[#378add]/15 font-bold uppercase tracking-wider">
+                      {lang === "fa" ? `ترم ${term.order}` : `Term ${term.order}`}
+                    </span>
+                    <h2 className="text-xl font-bold text-[#1f1e1c] mt-1.5">
+                      {lang === "fa" ? term.titleFa : term.titleEn}
+                    </h2>
+                    <p className="text-xs text-[#6b6a63] mt-0.5">
+                      {lang === "fa" ? term.titleEn : term.titleFa}
+                    </p>
+                  </div>
+
+                  <div className="bg-[#faf9f6] p-3 rounded-2xl border border-[#e2e0d8] min-w-[160px]">
+                    <div className="flex justify-between text-[11px] font-bold mb-1.5 text-[#6b6a63]">
+                      <span>{lang === "fa" ? "پیشرفت ترم" : "Term Progress"}</span>
+                      <span className="text-[#378add]">{progressPercent}%</span>
                     </div>
-
-                    <div className="flex flex-col items-center gap-10 relative py-2">
-                      <div className="absolute top-0 bottom-0 w-1 bg-[#e2e0d8] z-0" />
-
-                      {level.lessons.map((lesson) => {
-                        const isCompleted = completedIds.includes(lesson.id);
-                        const indexInFlat = flatLessons.findIndex((fl) => fl.id === lesson.id);
-                        const isUnlocked = checkIsUnlocked(lesson.id, indexInFlat);
-
-                        const posVal = indexInFlat % 3;
-                        const positionClass =
-                          posVal === 0
-                            ? "translate-x-0"
-                            : posVal === 1
-                            ? "translate-x-12"
-                            : "-translate-x-12";
-
-                        return (
-                          <div
-                            key={lesson.id}
-                            className={`flex flex-col items-center z-10 transition-all duration-300 ${positionClass} ${
-                              isUnlocked ? "opacity-100" : "opacity-50"
-                            }`}
-                          >
-                            {isUnlocked ? (
-                              <Link href={`/lesson/${lesson.id}`}>
-                                <div className="group relative cursor-pointer">
-                                  <div
-                                    className={`w-14 h-14 rounded-full flex items-center justify-center shadow-sm transform transition-transform duration-300 hover:scale-105 active:scale-95 ${
-                                      isCompleted
-                                        ? "bg-[#639922] text-white"
-                                        : "bg-[#378add] text-white"
-                                    }`}
-                                  >
-                                    {isCompleted ? (
-                                      <CheckCircle2 className="w-7 h-7" />
-                                    ) : (
-                                      <Award className="w-7 h-7 animate-pulse" />
-                                    )}
-                                  </div>
-
-                                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2.5 w-40 bg-[#1f1e1c] rounded-xl p-2.5 text-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg z-20">
-                                    <div className="text-[9px] text-[#e6f1fb] font-bold uppercase mb-0.5">
-                                      Lesson {lesson.order}
-                                    </div>
-                                    <div className="font-bold text-[11px] text-white mb-0.5">{lesson.titleEn}</div>
-                                    <div className="text-[9px] text-gray-400">{lesson.titleFa}</div>
-                                    <div className="text-[8px] text-[#faeeda] mt-1">+{lesson.xpReward} XP</div>
-                                  </div>
-                                </div>
-                              </Link>
-                            ) : (
-                              <div className="w-14 h-14 rounded-full bg-[#f4f2ec] border border-[#e2e0d8] flex items-center justify-center text-[#9a988f] shadow-inner">
-                                <Lock className="w-5 h-5" />
-                              </div>
-                            )}
-
-                            <div className="text-center mt-2 max-w-[100px]">
-                              <div className="font-bold text-[11px]">{lesson.titleEn}</div>
-                              <div className="text-[9px] text-[#6b6a63]">{lesson.titleFa}</div>
-                            </div>
-                          </div>
-                        );
-                      })}
+                    <div className="h-2 w-full bg-[#e2e0d8] rounded-full overflow-hidden">
+                      <div className="h-full bg-[#378add] rounded-full transition-all duration-500" style={{ width: `${progressPercent}%` }} />
                     </div>
                   </div>
-                ))}
+                </div>
+
+                {/* Levels & Lesson Nodes */}
+                <div className="space-y-10">
+                  {term.levels.map((level) => (
+                    <div key={level.id} className="space-y-8">
+                      {/* Level Title Pill */}
+                      <div className="bg-[#f4f2ec] px-5 py-2.5 rounded-2xl border border-[#e2e0d8] flex justify-between items-center shadow-2xs">
+                        <div className="flex items-center gap-2">
+                          <BookOpen className="w-4 h-4 text-[#378add]" />
+                          <div>
+                            <span className="text-[10px] font-bold text-[#6b6a63] uppercase">
+                              {lang === "fa" ? `سطح ${level.order}` : `LEVEL ${level.order}`}
+                            </span>
+                            <h3 className="text-xs font-bold text-[#1f1e1c]">
+                              {lang === "fa" ? level.titleFa : level.titleEn}
+                            </h3>
+                          </div>
+                        </div>
+                        <span className="text-[11px] text-[#6b6a63] font-bold">
+                          {lang === "fa" ? level.titleEn : level.titleFa}
+                        </span>
+                      </div>
+
+                      {/* Lesson Path Nodes */}
+                      <div className="flex flex-col items-center gap-12 relative py-4">
+                        {/* Connecting Vertical Line */}
+                        <div className="absolute top-4 bottom-4 w-1.5 bg-[#e2e0d8] rounded-full z-0" />
+
+                        {level.lessons.map((lesson) => {
+                          const isCompleted = completedIds.includes(lesson.id);
+                          const indexInFlat = flatLessons.findIndex((fl) => fl.id === lesson.id);
+                          const isUnlocked = checkIsUnlocked(lesson.id, indexInFlat);
+
+                          const posVal = indexInFlat % 3;
+                          const positionClass =
+                            posVal === 0
+                              ? "translate-x-0"
+                              : posVal === 1
+                              ? "translate-x-12 sm:translate-x-16"
+                              : "-translate-x-12 sm:-translate-x-16";
+
+                          return (
+                            <div
+                              key={lesson.id}
+                              className={`flex flex-col items-center z-10 transition-all duration-300 ${positionClass} ${
+                                isUnlocked ? "opacity-100" : "opacity-55"
+                              }`}
+                            >
+                              {isUnlocked ? (
+                                <Link href={`/lesson/${lesson.id}`}>
+                                  <div className="group relative cursor-pointer">
+                                    <div
+                                      className={`w-16 h-16 rounded-2xl flex items-center justify-center shadow-md transform transition-all duration-300 group-hover:scale-110 active:scale-95 ${
+                                        isCompleted
+                                          ? "bg-emerald-500 text-white ring-4 ring-emerald-100"
+                                          : "bg-[#378add] text-white ring-4 ring-blue-100"
+                                      }`}
+                                    >
+                                      {isCompleted ? (
+                                        <CheckCircle2 className="w-8 h-8" />
+                                      ) : (
+                                        <Award className="w-8 h-8 animate-pulse" />
+                                      )}
+                                    </div>
+
+                                    {/* Tooltip Card on Hover */}
+                                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 w-44 bg-[#1f1e1c] rounded-2xl p-3 text-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-xl z-30">
+                                      <div className="text-[9px] text-[#e6f1fb] font-bold uppercase mb-0.5">
+                                        {lang === "fa" ? `درس ${lesson.order}` : `Lesson ${lesson.order}`}
+                                      </div>
+                                      <div className="font-bold text-xs text-white mb-0.5">
+                                        {lang === "fa" ? lesson.titleFa : lesson.titleEn}
+                                      </div>
+                                      <div className="text-[10px] text-gray-400">
+                                        {lang === "fa" ? lesson.titleEn : lesson.titleFa}
+                                      </div>
+                                      <div className="text-[9px] text-[#faeeda] font-bold mt-1">
+                                        +{lesson.xpReward} XP
+                                      </div>
+                                    </div>
+                                  </div>
+                                </Link>
+                              ) : (
+                                <div className="w-16 h-16 rounded-2xl bg-[#faf9f6] border-2 border-[#e2e0d8] flex items-center justify-center text-[#9a988f] shadow-inner">
+                                  <Lock className="w-6 h-6" />
+                                </div>
+                              )}
+
+                              <div className="text-center mt-2.5 max-w-[120px]">
+                                <div className="font-bold text-xs text-[#1f1e1c]">
+                                  {lang === "fa" ? lesson.titleFa : lesson.titleEn}
+                                </div>
+                                <div className="text-[10px] text-[#6b6a63] font-medium">
+                                  {lang === "fa" ? lesson.titleEn : lesson.titleFa}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
       </main>
     </div>
   );
