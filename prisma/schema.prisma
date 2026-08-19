@@ -71,3 +71,27 @@ model Question {
   options       String   @default("[]") // JSON string array of options
   correctAnswer String
 }
+
+model BlogPost {
+  id         String   @id @default(uuid())
+  slug       String   @unique
+  titleEn    String
+  titleFa    String
+  contentEn  String
+  contentFa  String
+  coverImage String?
+  audioUrl   String?
+  published  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model SiteContent {
+  id         String   @id @default(uuid())
+  key        String   @unique // "about", "contact", "privacy"
+  titleEn    String
+  titleFa    String
+  contentEn  String
+  contentFa  String
+  updatedAt  DateTime @updatedAt
+}

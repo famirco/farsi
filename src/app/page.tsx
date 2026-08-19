@@ -81,6 +81,10 @@ export default function Home() {
       navMethodology: "Methodology",
       navWhy: "Why Farsiyar",
       navFaq: "FAQ",
+      navBlog: "Blog",
+      navAbout: "About Us",
+      navContact: "Contact",
+      navPrivacy: "Privacy",
       signInBtn: "Sign In",
       newToFarsi: "New to Farsiyar? Onboarding & Test",
       feature1Title: "Gamified Learning Path",
@@ -134,6 +138,10 @@ export default function Home() {
       navMethodology: "روش آموزش",
       navWhy: "چرا فارسیار",
       navFaq: "سوالات متداول",
+      navBlog: "وبلاگ",
+      navAbout: "درباره ما",
+      navContact: "تماس با ما",
+      navPrivacy: "حریم خصوصی",
       signInBtn: "ورود به حساب",
       newToFarsi: "ثبت‌نام و تعیین سطح جدید",
       feature1Title: "مسیر یادگیری بازی‌وار",
@@ -197,7 +205,9 @@ export default function Home() {
             <a href="#courses" className="hover:text-[#1f1e1c] transition-colors">{curr.navCourses}</a>
             <a href="#methodology" className="hover:text-[#1f1e1c] transition-colors">{curr.navMethodology}</a>
             <a href="#why" className="hover:text-[#1f1e1c] transition-colors">{curr.navWhy}</a>
-            <a href="#faq" className="hover:text-[#1f1e1c] transition-colors">{curr.navFaq}</a>
+            <Link href="/blog" className="hover:text-[#1f1e1c] transition-colors">{curr.navBlog}</Link>
+            <Link href="/about" className="hover:text-[#1f1e1c] transition-colors">{curr.navAbout}</Link>
+            <Link href="/contact" className="hover:text-[#1f1e1c] transition-colors">{curr.navContact}</Link>
           </nav>
 
           <div className="flex items-center gap-3">
@@ -310,14 +320,6 @@ export default function Home() {
             >
               {curr.newToFarsi}
             </button>
-
-            {/* Test Credentials Box */}
-            <div className="mt-6 pt-4 border-t border-[#e2e0d8] text-center">
-              <span className="text-[10px] text-[#9a988f] font-semibold uppercase block mb-1">Testing Credentials</span>
-              <p className="text-[11px] text-[#6b6a63] leading-relaxed">
-                {curr.helpText}
-              </p>
-            </div>
 
             {savedUser && (
               <div className="mt-4 text-center">
@@ -503,11 +505,12 @@ export default function Home() {
           </div>
 
           <div>
-            <h4 className="font-bold text-xs text-[#1f1e1c] mb-3">Platform</h4>
+            <h4 className="font-bold text-xs text-[#1f1e1c] mb-3">Platform & Community</h4>
             <ul className="space-y-2 text-[11px]">
-              <li><a href="#why" className="hover:underline">{curr.navWhy}</a></li>
-              <li><a href="#methodology" className="hover:underline">{curr.navMethodology}</a></li>
-              <li><a href="#faq" className="hover:underline">{curr.navFaq}</a></li>
+              <li><Link href="/blog" className="hover:underline">{curr.navBlog}</Link></li>
+              <li><Link href="/about" className="hover:underline">{curr.navAbout}</Link></li>
+              <li><Link href="/contact" className="hover:underline">{curr.navContact}</Link></li>
+              <li><Link href="/privacy" className="hover:underline">{curr.navPrivacy}</Link></li>
             </ul>
           </div>
 
@@ -524,8 +527,9 @@ export default function Home() {
           <div>
             &copy; {new Date().getFullYear()} Farsiyar Persian Learning App. All rights reserved.
           </div>
-          <div className="flex items-center gap-4 text-[#9a988f]">
-            <span>Designed for Heritage Persian Learners</span>
+          <div className="flex items-center gap-6 text-[#6b6a63]">
+            <Link href="/privacy" className="hover:underline">{curr.navPrivacy}</Link>
+            <Link href="/contact" className="hover:underline">{curr.navContact}</Link>
           </div>
         </div>
       </footer>

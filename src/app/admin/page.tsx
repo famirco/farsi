@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Plus, ListPlus, LayoutGrid, Info, Settings, Users, Layers, BookOpen, Check, Database, Download, Upload, RefreshCw, HardDriveUpload, FileJson, AlertCircle, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Plus, ListPlus, LayoutGrid, Info, Settings, Users, Layers, BookOpen, Check, Database, Download, Upload, RefreshCw, HardDriveUpload, FileJson, AlertCircle, CheckCircle2, FileText, Edit3, Image as ImageIcon, Volume2, FileEdit } from "lucide-react";
 
 interface Term {
   id: string;
@@ -59,11 +59,30 @@ interface UserProfile {
 
 export default function AdminPanel() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"users" | "terms" | "lessons" | "backup">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "terms" | "lessons" | "backup" | "blog" | "pages">("users");
   const [isRestoring, setIsRestoring] = useState(false);
   const [backupFile, setBackupFile] = useState<File | null>(null);
   const [backupPreview, setBackupPreview] = useState<any>(null);
   const [backupMessage, setBackupMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  // Blog Management States
+  const [blogPosts, setBlogPosts] = useState<any[]>([]);
+  const [blogTitleEn, setBlogTitleEn] = useState("");
+  const [blogTitleFa, setBlogTitleFa] = useState("");
+  const [blogContentEn, setBlogContentEn] = useState("");
+  const [blogContentFa, setBlogContentFa] = useState("");
+  const [blogCoverImage, setBlogCoverImage] = useState("");
+  const [blogAudioUrl, setBlogAudioUrl] = useState("");
+  const [editingBlogId, setEditingBlogId] = useState<string | null>(null);
+
+  // Site Pages Content States
+  const [selectedPageKey, setSelectedPageKey] = useState<"about" | "contact" | "privacy">("about");
+  const [pageTitleEn, setPageTitleEn] = useState("");
+  const [pageTitleFa, setPageTitleFa] = useState("");
+  const [pageContentEn, setPageContentEn] = useState("");
+  const [pageContentFa, setPageContentFa] = useState("");
+  const [isPageSaving, setIsPageSaving] = useState(false);
+  const [pageSaveMessage, setPageSaveMessage] = useState("");
 
   // Master Data
   const [terms, setTerms] = useState<Term[]>([]);
@@ -549,6 +568,37 @@ export default function AdminPanel() {
             >
               <Database className="w-3.5 h-3.5" />
               <span>Backup & Restore</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setActiveTab("blog");
+                fetch("/api/blog").then(res => res.json()).then(data => { if (Array.isArray(data)) setBlogPosts(data); });
+              }}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "blog" ? "bg-white text-[#1f1e1c] shadow-sm" : "text-[#6b6a63]"
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Blog Articles</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setActiveTab("pages");
+                fetch(`/api/pages?key=${selectedPageKey}`).then(res => res.json()).then(data => {
+                  setPageTitleEn(data.titleEn || "");
+                  setPageTitleFa(data.titleFa || "");
+                  setPageContentEn(data.contentEn || "");
+                  setPageContentFa(data.contentFa || "");
+                });
+              }}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "pages" ? "bg-white text-[#1f1e1c] shadow-sm" : "text-[#6b6a63]"
+              }`}
+            >
+              <FileEdit className="w-3.5 h-3.5" />
+              <span>Site Pages Content</span>
             </button>
           </div>
         </div>
@@ -1348,6 +1398,373 @@ export default function AdminPanel() {
                 </button>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* TAB 5: BLOG ARTICLES MANAGEMENT */}
+        {activeTab === "blog" && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-1 bg-white border border-[#e2e0d8] rounded-3xl p-6 shadow-sm space-y-4">
+              <h2 className="text-base font-bold">
+                {editingBlogId ? "ویرایش مقاله وبلاگ" : "افزودن مقاله جدید به وبلاگ"}
+              </h2>
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (!blogTitleEn || !blogTitleFa || !blogContentEn || !blogContentFa) return;
+
+                  const payload = {
+                    titleEn: blogTitleEn,
+                    titleFa: blogTitleFa,
+                    contentEn: blogContentEn,
+                    contentFa: blogContentFa,
+                    coverImage: blogCoverImage,
+                    audioUrl: blogAudioUrl,
+                  };
+
+                  const url = editingBlogId ? `/api/blog/${editingBlogId}` : "/api/blog";
+                  const method = editingBlogId ? "PUT" : "POST";
+
+                  const res = await fetch(url, {
+                    method,
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                  });
+
+                  if (res.ok) {
+                    setBlogTitleEn("");
+                    setBlogTitleFa("");
+                    setBlogContentEn("");
+                    setBlogContentFa("");
+                    setBlogCoverImage("");
+                    setBlogAudioUrl("");
+                    setEditingBlogId(null);
+                    const bRes = await fetch("/api/blog");
+                    if (bRes.ok) setBlogPosts(await bRes.json());
+                  }
+                }}
+                className="space-y-4 text-xs"
+              >
+                <div>
+                  <label className="block font-bold mb-1">عنوان مقاله (English)</label>
+                  <input
+                    type="text"
+                    value={blogTitleEn}
+                    onChange={(e) => setBlogTitleEn(e.target.value)}
+                    placeholder="e.g. Traditional Norouz Customs"
+                    className="w-full px-3 py-2 border border-[#e2e0d8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#378add]"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1">عنوان مقاله (فارسی)</label>
+                  <input
+                    type="text"
+                    value={blogTitleFa}
+                    onChange={(e) => setBlogTitleFa(e.target.value)}
+                    placeholder="مثلا: آیین‌های سنتی نوروز"
+                    className="w-full px-3 py-2 border border-[#e2e0d8] rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-[#378add]"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1">متن مقاله (English)</label>
+                  <textarea
+                    value={blogContentEn}
+                    onChange={(e) => setBlogContentEn(e.target.value)}
+                    rows={4}
+                    placeholder="Write article details in English..."
+                    className="w-full px-3 py-2 border border-[#e2e0d8] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#378add]"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1">متن مقاله (فارسی)</label>
+                  <textarea
+                    value={blogContentFa}
+                    onChange={(e) => setBlogContentFa(e.target.value)}
+                    rows={4}
+                    placeholder="متن مقاله را به فارسی وارد کنید..."
+                    className="w-full px-3 py-2 border border-[#e2e0d8] rounded-xl text-right focus:outline-none focus:ring-2 focus:ring-[#378add]"
+                    required
+                  />
+                </div>
+
+                {/* Cover Image Upload */}
+                <div>
+                  <label className="block font-bold mb-1">تصویر کاور مقاله (آپلود فایل)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={blogCoverImage}
+                      onChange={(e) => setBlogCoverImage(e.target.value)}
+                      placeholder="/uploads/image.jpg"
+                      className="flex-1 px-3 py-2 border border-[#e2e0d8] rounded-xl text-xs"
+                    />
+                    <label className="px-3 py-2 bg-[#f4f2ec] hover:bg-[#e2e0d8] rounded-xl font-bold cursor-pointer shrink-0">
+                      <span>آپلود عکس</span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const formData = new FormData();
+                          formData.append("file", file);
+                          const res = await fetch("/api/upload", { method: "POST", body: formData });
+                          if (res.ok) {
+                            const data = await res.json();
+                            setBlogCoverImage(data.url);
+                          }
+                        }}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Audio File Upload */}
+                <div>
+                  <label className="block font-bold mb-1">فایل صوتی / پادکست (آپلود MP3)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={blogAudioUrl}
+                      onChange={(e) => setBlogAudioUrl(e.target.value)}
+                      placeholder="/uploads/audio.mp3"
+                      className="flex-1 px-3 py-2 border border-[#e2e0d8] rounded-xl text-xs"
+                    />
+                    <label className="px-3 py-2 bg-[#f4f2ec] hover:bg-[#e2e0d8] rounded-xl font-bold cursor-pointer shrink-0">
+                      <span>آپلود صدا</span>
+                      <input
+                        type="file"
+                        accept="audio/*"
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const formData = new FormData();
+                          formData.append("file", file);
+                          const res = await fetch("/api/upload", { method: "POST", body: formData });
+                          if (res.ok) {
+                            const data = await res.json();
+                            setBlogAudioUrl(data.url);
+                          }
+                        }}
+                        className="hidden"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button
+                    type="submit"
+                    className="flex-1 py-2.5 bg-[#1f1e1c] hover:bg-black text-white font-bold rounded-xl"
+                  >
+                    {editingBlogId ? "بروزرسانی مقاله" : "ثبت مقاله"}
+                  </button>
+                  {editingBlogId && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingBlogId(null);
+                        setBlogTitleEn("");
+                        setBlogTitleFa("");
+                        setBlogContentEn("");
+                        setBlogContentFa("");
+                        setBlogCoverImage("");
+                        setBlogAudioUrl("");
+                      }}
+                      className="px-4 py-2.5 bg-gray-200 text-gray-700 font-bold rounded-xl"
+                    >
+                      انصراف
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+
+            {/* Articles List */}
+            <div className="lg:col-span-2 bg-white border border-[#e2e0d8] rounded-3xl p-6 shadow-sm space-y-4">
+              <h2 className="text-base font-bold">لیست مقالات وبلاگ ({blogPosts.length})</h2>
+              {blogPosts.length === 0 ? (
+                <p className="text-xs text-[#6b6a63]">مقاله‌ای ثبت نشده است.</p>
+              ) : (
+                <div className="space-y-3">
+                  {blogPosts.map((post) => (
+                    <div key={post.id} className="p-4 border border-[#e2e0d8] rounded-2xl flex items-center justify-between gap-4 bg-[#faf9f6]">
+                      <div className="space-y-1">
+                        <div className="font-bold text-xs text-[#1f1e1c]">{post.titleFa} / {post.titleEn}</div>
+                        <div className="text-[10px] text-[#6b6a63]">Slug: {post.slug}</div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingBlogId(post.id);
+                            setBlogTitleEn(post.titleEn);
+                            setBlogTitleFa(post.titleFa);
+                            setBlogContentEn(post.contentEn);
+                            setBlogContentFa(post.contentFa);
+                            setBlogCoverImage(post.coverImage || "");
+                            setBlogAudioUrl(post.audioUrl || "");
+                          }}
+                          className="px-3 py-1 bg-blue-50 text-[#185fa5] font-bold rounded-lg text-xs"
+                        >
+                          ویرایش
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (!confirm("آیا از حذف مقاله مطمئن هستید؟")) return;
+                            const res = await fetch(`/api/blog/${post.id}`, { method: "DELETE" });
+                            if (res.ok) {
+                              const bRes = await fetch("/api/blog");
+                              if (bRes.ok) setBlogPosts(await bRes.json());
+                            }
+                          }}
+                          className="px-3 py-1 bg-red-50 text-red-700 font-bold rounded-lg text-xs"
+                        >
+                          حذف
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 6: SITE PAGES CONTENT EDITOR */}
+        {activeTab === "pages" && (
+          <div className="bg-white border border-[#e2e0d8] rounded-3xl p-6 shadow-sm space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-[#e2e0d8]">
+              <div>
+                <h2 className="text-base font-bold">مدیریت متون صفحات عمومی سایت</h2>
+                <p className="text-xs text-[#6b6a63]">ویرایش مستقیم محتوای صفحات درباره ما، تماس با ما و قوانین</p>
+              </div>
+
+              <div className="flex gap-2">
+                {(["about", "contact", "privacy"] as const).map((key) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={async () => {
+                      setSelectedPageKey(key);
+                      setPageSaveMessage("");
+                      const res = await fetch(`/api/pages?key=${key}`);
+                      if (res.ok) {
+                        const data = await res.json();
+                        setPageTitleEn(data.titleEn || "");
+                        setPageTitleFa(data.titleFa || "");
+                        setPageContentEn(data.contentEn || "");
+                        setPageContentFa(data.contentFa || "");
+                      }
+                    }}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                      selectedPageKey === key ? "bg-[#1f1e1c] text-white shadow-sm" : "bg-[#f4f2ec] text-[#6b6a63]"
+                    }`}
+                  >
+                    {key === "about" ? "درباره ما" : key === "contact" ? "تماس با ما" : "حریم خصوصی"}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {pageSaveMessage && (
+              <div className="p-3 bg-[#eaf3de] border border-[#3b6d11]/20 text-[#3b6d11] text-xs font-semibold rounded-2xl">
+                {pageSaveMessage}
+              </div>
+            )}
+
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setIsPageSaving(true);
+                setPageSaveMessage("");
+
+                try {
+                  const res = await fetch("/api/pages", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      key: selectedPageKey,
+                      titleEn: pageTitleEn,
+                      titleFa: pageTitleFa,
+                      contentEn: pageContentEn,
+                      contentFa: pageContentFa,
+                    }),
+                  });
+
+                  if (res.ok) {
+                    setPageSaveMessage("تغییرات صفحه با موفقیت ذخیره شد!");
+                  }
+                } catch (err) {
+                  console.error(err);
+                } finally {
+                  setIsPageSaving(false);
+                }
+              }}
+              className="space-y-4 text-xs"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold mb-1">عنوان صفحه (English)</label>
+                  <input
+                    type="text"
+                    value={pageTitleEn}
+                    onChange={(e) => setPageTitleEn(e.target.value)}
+                    className="w-full px-3.5 py-2.5 border border-[#e2e0d8] rounded-xl font-medium focus:outline-none focus:ring-2 focus:ring-[#378add]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold mb-1">عنوان صفحه (فارسی)</label>
+                  <input
+                    type="text"
+                    value={pageTitleFa}
+                    onChange={(e) => setPageTitleFa(e.target.value)}
+                    className="w-full px-3.5 py-2.5 border border-[#e2e0d8] rounded-xl text-right font-medium focus:outline-none focus:ring-2 focus:ring-[#378add]"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold mb-1">محتوای کامل صفحه (English)</label>
+                  <textarea
+                    value={pageContentEn}
+                    onChange={(e) => setPageContentEn(e.target.value)}
+                    rows={10}
+                    className="w-full px-3.5 py-2.5 border border-[#e2e0d8] rounded-xl font-medium leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#378add]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold mb-1">محتوای کامل صفحه (فارسی)</label>
+                  <textarea
+                    value={pageContentFa}
+                    onChange={(e) => setPageContentFa(e.target.value)}
+                    rows={10}
+                    className="w-full px-3.5 py-2.5 border border-[#e2e0d8] rounded-xl text-right font-medium leading-relaxed focus:outline-none focus:ring-2 focus:ring-[#378add]"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isPageSaving}
+                className="w-full py-3 bg-[#1f1e1c] hover:bg-black text-white rounded-xl font-bold text-xs shadow-sm transition-all"
+              >
+                {isPageSaving ? "در حال ذخیره‌سازی..." : "ذخیره تغییرات محتوای صفحه"}
+              </button>
+            </form>
           </div>
         )}
       </main>
