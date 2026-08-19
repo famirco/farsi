@@ -15,11 +15,9 @@ Farsiyar is an interactive Persian language learning application built with Next
 - **Database Backup & Restore System:**
   - Export full DB backup as a structured JSON file (`farsiyar_db_backup_YYYY-MM-DD.json`).
   - Transactional import & restore system in Admin Panel (`/admin` under Backup & Restore tab) for terms, levels, lessons, questions, and user progress.
-- **Essential Public Pages & CMS:**
-  - About Us (`/about`), Contact & Support (`/contact`), Privacy Policy (`/privacy`), and Blog System (`/blog` and `/blog/[slug]`).
-  - Full Admin Panel CMS integration for creating/editing Blog Articles (with cover image and MP3 podcast audio uploads) and editing text for About, Contact, and Privacy pages.
-  - Manual payment & admin activation flow integrated in Contact page and course access points.
-  - Production Sign-in cleanup (removed demo credentials box from landing page).
+- **Responsive Word-Break & Media Overflow Protection:**
+  - Added global `overflow-wrap: break-word` and `word-break: break-word` across all CSS elements to guarantee that long continuous words (in both Persian and English) or missing Enter/space breaks automatically wrap smoothly without overflowing out of article cards.
+  - Responsive container styling for Blog articles, cover images, and MP3 podcast audio players.
 
 ## Database & API Routes
 - `prisma/schema.prisma`: Schema using `postgresql` datasource provider.
