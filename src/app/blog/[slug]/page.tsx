@@ -69,9 +69,9 @@ export default function BlogDetailPage() {
             </Link>
           </div>
         ) : (
-          <article className="bg-white border border-[#e2e0d8] rounded-3xl overflow-hidden shadow-sm space-y-8 p-8 sm:p-12">
+          <article className="bg-white border border-[#e2e0d8] rounded-3xl overflow-hidden shadow-sm space-y-8 p-6 sm:p-10 md:p-12 max-w-full">
             <div className="space-y-4">
-              <div className="flex items-center gap-3 text-xs text-[#6b6a63]">
+              <div className="flex flex-wrap items-center gap-3 text-xs text-[#6b6a63]">
                 <span className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
                   {new Date(post.createdAt).toLocaleDateString(lang === "fa" ? "fa-IR" : "en-US")}
@@ -81,20 +81,26 @@ export default function BlogDetailPage() {
                 </span>
               </div>
 
-              <h1 className="text-2xl sm:text-4xl font-extrabold text-[#1f1e1c] leading-tight">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#1f1e1c] leading-tight break-words [word-break:break-word]">
                 {lang === "fa" ? post.titleFa : post.titleEn}
               </h1>
             </div>
 
             {post.coverImage && (
-              <img src={post.coverImage} alt={post.titleEn} className="w-full h-80 object-cover rounded-2xl border border-[#e2e0d8]" />
+              <div className="w-full overflow-hidden rounded-2xl border border-[#e2e0d8] bg-[#f4f2ec]">
+                <img
+                  src={post.coverImage}
+                  alt={post.titleEn}
+                  className="w-full max-h-96 object-cover"
+                />
+              </div>
             )}
 
             {/* Audio Player if present */}
             {post.audioUrl && (
-              <div className="bg-[#e6f1fb] border border-[#378add]/20 p-4 rounded-2xl space-y-2">
+              <div className="bg-[#e6f1fb] border border-[#378add]/20 p-4 sm:p-5 rounded-2xl space-y-2 max-w-full overflow-hidden">
                 <div className="flex items-center gap-2 text-xs font-bold text-[#185fa5]">
-                  <Volume2 className="w-4 h-4" />
+                  <Volume2 className="w-4 h-4 shrink-0" />
                   <span>{lang === "fa" ? "پادکست / فایل صوتی مقاله:" : "Listen to Audio Podcast:"}</span>
                 </div>
                 <audio controls className="w-full h-10 accent-[#378add]">
@@ -104,8 +110,8 @@ export default function BlogDetailPage() {
               </div>
             )}
 
-            {/* Content Body */}
-            <div className="prose max-w-none text-sm text-[#1f1e1c] leading-relaxed whitespace-pre-line border-t border-[#e2e0d8] pt-6">
+            {/* Content Body with text wrapping & line break support */}
+            <div className="prose-content text-sm sm:text-base text-[#1f1e1c] leading-relaxed border-t border-[#e2e0d8] pt-6 max-w-full overflow-hidden">
               {lang === "fa" ? post.contentFa : post.contentEn}
             </div>
           </article>

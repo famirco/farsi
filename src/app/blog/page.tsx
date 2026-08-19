@@ -102,10 +102,10 @@ export default function BlogListPage() {
                         </span>
                       )}
                     </div>
-                    <h2 className="font-bold text-base text-[#1f1e1c] line-clamp-2">
+                    <h2 className="font-bold text-base text-[#1f1e1c] line-clamp-2 break-words [word-break:break-word]">
                       {lang === "fa" ? post.titleFa : post.titleEn}
                     </h2>
-                    <p className="text-xs text-[#6b6a63] line-clamp-3 leading-relaxed">
+                    <p className="text-xs text-[#6b6a63] line-clamp-3 leading-relaxed break-words [word-break:break-word]">
                       {lang === "fa" ? post.contentFa : post.contentEn}
                     </p>
                   </div>

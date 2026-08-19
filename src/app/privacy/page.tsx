@@ -68,7 +68,7 @@ export default function PrivacyPage() {
             </div>
           </div>
 
-          <div className="prose text-xs sm:text-sm text-[#6b6a63] leading-relaxed whitespace-pre-line border-t border-[#e2e0d8] pt-6">
+          <div className="prose-content text-xs sm:text-sm text-[#6b6a63] leading-relaxed border-t border-[#e2e0d8] pt-6 max-w-full overflow-hidden">
             {isLoading ? "Loading..." : (lang === "fa" ? pageData?.contentFa : pageData?.contentEn)}
           </div>
         </div>
