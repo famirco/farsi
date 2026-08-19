@@ -15,10 +15,10 @@ Farsiyar is an interactive Persian language learning application built with Next
 - **Database Backup & Restore System:**
   - Export full DB backup as a structured JSON file (`farsiyar_db_backup_YYYY-MM-DD.json`).
   - Transactional import & restore system in Admin Panel (`/admin` under Backup & Restore tab) for terms, levels, lessons, questions, and user progress.
-- **Global Language Persistence (فارسی / English):**
-  - Persists chosen language in `localStorage` under `farsi_lang`.
-  - Header language switcher widget present on Landing Page, Onboarding, Dashboard, and Lesson Player.
-  - Dynamically renders `titleFa`/`descFa`/`promptFa` or `titleEn`/`descEn`/`promptEn` according to the active selection.
+- **Modern Student Dashboard Layout & Roadmap:**
+  - Expanded 6XL wide layout with sticky student sidebar (profile, skills breakdown, daily practice, and certificates).
+  - Term progress percentage indicator bars.
+  - Glowing interactive lesson roadmap nodes with hover tooltips and RTL/LTR auto-direction support.
 
 ## Database & API Routes
 - `prisma/schema.prisma`: Schema using `postgresql` datasource provider.
