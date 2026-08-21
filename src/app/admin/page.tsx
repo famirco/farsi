@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Plus, ListPlus, LayoutGrid, Info, Settings, Users, Layers, BookOpen, Check, Database, Download, Upload, RefreshCw, HardDriveUpload, FileJson, AlertCircle, CheckCircle2, FileText, Edit3, Image as ImageIcon, Volume2, FileEdit } from "lucide-react";
+import { ArrowLeft, Plus, ListPlus, LayoutGrid, Info, Settings, Users, Layers, BookOpen, Check, Database, Download, Upload, RefreshCw, HardDriveUpload, FileJson, AlertCircle, CheckCircle2, FileText, Edit3, Image as ImageIcon, Volume2, FileEdit, ClipboardCheck } from "lucide-react";
 
 interface Term {
   id: string;
@@ -59,7 +59,7 @@ interface UserProfile {
 
 export default function AdminPanel() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"users" | "terms" | "lessons" | "backup" | "blog" | "pages">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "terms" | "lessons" | "backup" | "blog" | "pages" | "placement">("users");
   const [isRestoring, setIsRestoring] = useState(false);
   const [backupFile, setBackupFile] = useState<File | null>(null);
   const [backupPreview, setBackupPreview] = useState<any>(null);
@@ -76,13 +76,30 @@ export default function AdminPanel() {
   const [editingBlogId, setEditingBlogId] = useState<string | null>(null);
 
   // Site Pages Content States
-  const [selectedPageKey, setSelectedPageKey] = useState<"about" | "contact" | "privacy">("about");
+  const [selectedPageKey, setSelectedPageKey] = useState<"about" | "contact" | "privacy" | "placement_test">("about");
   const [pageTitleEn, setPageTitleEn] = useState("");
   const [pageTitleFa, setPageTitleFa] = useState("");
   const [pageContentEn, setPageContentEn] = useState("");
   const [pageContentFa, setPageContentFa] = useState("");
   const [isPageSaving, setIsPageSaving] = useState(false);
   const [pageSaveMessage, setPageSaveMessage] = useState("");
+
+  // Placement Test Admin States
+  const [placementConfig, setPlacementConfig] = useState({
+    listeningPromptEn: "Listen to the audio clip and select where the speaker says they are going today:",
+    listeningPromptFa: "به فایل صوتی گوش دهید و مشخص کنید گوینده امروز به کجا می‌رود:",
+    listeningOptions: "مدرسه (School), بازار (Market), پارک (Park), خانه (Home)",
+    listeningCorrect: "مدرسه (School)",
+    readingPromptEn: "Translate the following word to English: «کتاب»",
+    readingPromptFa: "ترجمه کلمه زیر را انتخاب کنید: «کتاب»",
+    readingOptions: "Book, Pen, Notebook, Chair",
+    readingCorrect: "Book",
+    speakingPromptEn: "Say 'سلام' (Salâm) out loud in Persian:",
+    speakingPromptFa: "جمله روبرو را با صدای بلند تلفظ کنید: «سلام»",
+    speakingTarget: "سلام",
+  });
+  const [isPlacementSaving, setIsPlacementSaving] = useState(false);
+  const [placementSaveMessage, setPlacementSaveMessage] = useState("");
 
   // Master Data
   const [terms, setTerms] = useState<Term[]>([]);
@@ -599,6 +616,42 @@ export default function AdminPanel() {
             >
               <FileEdit className="w-3.5 h-3.5" />
               <span>Site Pages Content</span>
+            </button>
+
+            <button
+              onClick={async () => {
+                setActiveTab("placement");
+                try {
+                  const res = await fetch("/api/pages?key=placement_test");
+                  if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.contentEn) {
+                      const parsed = JSON.parse(data.contentEn);
+                      setPlacementConfig({
+                        listeningPromptEn: parsed.listeningPromptEn || "",
+                        listeningPromptFa: parsed.listeningPromptFa || "",
+                        listeningOptions: Array.isArray(parsed.listeningOptions) ? parsed.listeningOptions.join(", ") : parsed.listeningOptions || "",
+                        listeningCorrect: parsed.listeningCorrect || "",
+                        readingPromptEn: parsed.readingPromptEn || "",
+                        readingPromptFa: parsed.readingPromptFa || "",
+                        readingOptions: Array.isArray(parsed.readingOptions) ? parsed.readingOptions.join(", ") : parsed.readingOptions || "",
+                        readingCorrect: parsed.readingCorrect || "",
+                        speakingPromptEn: parsed.speakingPromptEn || "",
+                        speakingPromptFa: parsed.speakingPromptFa || "",
+                        speakingTarget: parsed.speakingTarget || "",
+                      });
+                    }
+                  }
+                } catch (e) {
+                  console.error(e);
+                }
+              }}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "placement" ? "bg-white text-[#1f1e1c] shadow-sm" : "text-[#6b6a63]"
+              }`}
+            >
+              <ClipboardCheck className="w-3.5 h-3.5" />
+              <span>Placement Test</span>
             </button>
           </div>
         </div>
@@ -1763,6 +1816,222 @@ export default function AdminPanel() {
                 className="w-full py-3 bg-[#1f1e1c] hover:bg-black text-white rounded-xl font-bold text-xs shadow-sm transition-all"
               >
                 {isPageSaving ? "در حال ذخیره‌سازی..." : "ذخیره تغییرات محتوای صفحه"}
+              </button>
+            </form>
+          </div>
+        )}
+
+        {/* TAB 7: PLACEMENT TEST QUESTIONS & CONFIG */}
+        {activeTab === "placement" && (
+          <div className="bg-white border border-[#e2e0d8] rounded-3xl p-6 shadow-sm space-y-6">
+            <div className="flex items-center justify-between border-b border-[#e2e0d8] pb-4">
+              <div>
+                <h2 className="font-bold text-base text-[#1f1e1c]">مدیریت سوالات آزمون تعیین سطح (Placement Test)</h2>
+                <p className="text-xs text-[#6b6a63]">ویرایش مستقیم متن سوالات، گزینه‌ها و پاسخ‌های صحیح آزمون تعیین سطح دانش‌آموزان جدید</p>
+              </div>
+              <ClipboardCheck className="w-6 h-6 text-[#185fa5]" />
+            </div>
+
+            {placementSaveMessage && (
+              <div className="p-3 bg-[#eaf3de] border border-[#3b6d11]/20 text-[#3b6d11] text-xs font-semibold rounded-2xl">
+                {placementSaveMessage}
+              </div>
+            )}
+
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setIsPlacementSaving(true);
+                setPlacementSaveMessage("");
+
+                try {
+                  const options1 = placementConfig.listeningOptions.split(",").map(s => s.trim()).filter(Boolean);
+                  const options2 = placementConfig.readingOptions.split(",").map(s => s.trim()).filter(Boolean);
+
+                  const payload = {
+                    listeningPromptEn: placementConfig.listeningPromptEn,
+                    listeningPromptFa: placementConfig.listeningPromptFa,
+                    listeningOptions: options1,
+                    listeningCorrect: placementConfig.listeningCorrect,
+                    readingPromptEn: placementConfig.readingPromptEn,
+                    readingPromptFa: placementConfig.readingPromptFa,
+                    readingOptions: options2,
+                    readingCorrect: placementConfig.readingCorrect,
+                    speakingPromptEn: placementConfig.speakingPromptEn,
+                    speakingPromptFa: placementConfig.speakingPromptFa,
+                    speakingTarget: placementConfig.speakingTarget,
+                  };
+
+                  const res = await fetch("/api/pages", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      key: "placement_test",
+                      titleEn: "Placement Test & Assessment",
+                      titleFa: "آزمون تعیین سطح و ارزیابی اولیه",
+                      contentEn: JSON.stringify(payload),
+                      contentFa: JSON.stringify(payload),
+                    }),
+                  });
+
+                  if (res.ok) {
+                    setPlacementSaveMessage("سوالات و تنظیمات آزمون تعیین سطح با موفقیت ذخیره شدند!");
+                  }
+                } catch (err) {
+                  console.error(err);
+                } finally {
+                  setIsPlacementSaving(false);
+                }
+              }}
+              className="space-y-6 text-xs"
+            >
+              {/* Section 1: Listening Question */}
+              <div className="border border-[#e2e0d8] rounded-2xl p-5 bg-[#faf9f6] space-y-4">
+                <h3 className="font-bold text-sm text-[#185fa5]">بخش ۱: سوال شنیداری (Listening Question)</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-bold mb-1">صورت سوال (English)</label>
+                    <input
+                      type="text"
+                      value={placementConfig.listeningPromptEn}
+                      onChange={(e) => setPlacementConfig({ ...placementConfig, listeningPromptEn: e.target.value })}
+                      className="w-full px-3.5 py-2.5 border border-[#e2e0d8] bg-white rounded-xl font-medium"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold mb-1">صورت سوال (فارسی)</label>
+                    <input
+                      type="text"
+                      value={placementConfig.listeningPromptFa}
+                      onChange={(e) => setPlacementConfig({ ...placementConfig, listeningPromptFa: e.target.value })}
+                      className="w-full px-3.5 py-2.5 border border-[#e2e0d8] bg-white rounded-xl text-right font-medium"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-bold mb-1">گزینه‌های پاسخ (با ویرگول انگلیسی جدا کنید)</label>
+                    <input
+                      type="text"
+                      value={placementConfig.listeningOptions}
+                      onChange={(e) => setPlacementConfig({ ...placementConfig, listeningOptions: e.target.value })}
+                      className="w-full px-3.5 py-2.5 border border-[#e2e0d8] bg-white rounded-xl font-medium"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold mb-1">پاسخ صحیح (دقیقاً با یکی از گزینه‌ها برابر باشد)</label>
+                    <input
+                      type="text"
+                      value={placementConfig.listeningCorrect}
+                      onChange={(e) => setPlacementConfig({ ...placementConfig, listeningCorrect: e.target.value })}
+                      className="w-full px-3.5 py-2.5 border border-[#e2e0d8] bg-white rounded-xl font-medium"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 2: Reading Question */}
+              <div className="border border-[#e2e0d8] rounded-2xl p-5 bg-[#faf9f6] space-y-4">
+                <h3 className="font-bold text-sm text-[#185fa5]">بخش ۲: سوال خواندن (Reading Question)</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-bold mb-1">صورت سوال (English)</label>
+                    <input
+                      type="text"
+                      value={placementConfig.readingPromptEn}
+                      onChange={(e) => setPlacementConfig({ ...placementConfig, readingPromptEn: e.target.value })}
+                      className="w-full px-3.5 py-2.5 border border-[#e2e0d8] bg-white rounded-xl font-medium"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold mb-1">صورت سوال (فارسی)</label>
+                    <input
+                      type="text"
+                      value={placementConfig.readingPromptFa}
+                      onChange={(e) => setPlacementConfig({ ...placementConfig, readingPromptFa: e.target.value })}
+                      className="w-full px-3.5 py-2.5 border border-[#e2e0d8] bg-white rounded-xl text-right font-medium"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-bold mb-1">گزینه‌های پاسخ (با ویرگول انگلیسی جدا کنید)</label>
+                    <input
+                      type="text"
+                      value={placementConfig.readingOptions}
+                      onChange={(e) => setPlacementConfig({ ...placementConfig, readingOptions: e.target.value })}
+                      className="w-full px-3.5 py-2.5 border border-[#e2e0d8] bg-white rounded-xl font-medium"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold mb-1">پاسخ صحیح</label>
+                    <input
+                      type="text"
+                      value={placementConfig.readingCorrect}
+                      onChange={(e) => setPlacementConfig({ ...placementConfig, readingCorrect: e.target.value })}
+                      className="w-full px-3.5 py-2.5 border border-[#e2e0d8] bg-white rounded-xl font-medium"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 3: Speaking Question */}
+              <div className="border border-[#e2e0d8] rounded-2xl p-5 bg-[#faf9f6] space-y-4">
+                <h3 className="font-bold text-sm text-[#185fa5]">بخش ۳: سوال گفتاری و تلفظ (Speaking Question)</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-bold mb-1">راهنمای سوال (English)</label>
+                    <input
+                      type="text"
+                      value={placementConfig.speakingPromptEn}
+                      onChange={(e) => setPlacementConfig({ ...placementConfig, speakingPromptEn: e.target.value })}
+                      className="w-full px-3.5 py-2.5 border border-[#e2e0d8] bg-white rounded-xl font-medium"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold mb-1">راهنمای سوال (فارسی)</label>
+                    <input
+                      type="text"
+                      value={placementConfig.speakingPromptFa}
+                      onChange={(e) => setPlacementConfig({ ...placementConfig, speakingPromptFa: e.target.value })}
+                      className="w-full px-3.5 py-2.5 border border-[#e2e0d8] bg-white rounded-xl text-right font-medium"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold mb-1">عبارت/کلمه مورد نظر برای تلفظ (Target Speech Word)</label>
+                  <input
+                    type="text"
+                    value={placementConfig.speakingTarget}
+                    onChange={(e) => setPlacementConfig({ ...placementConfig, speakingTarget: e.target.value })}
+                    className="w-full px-3.5 py-2.5 border border-[#e2e0d8] bg-white rounded-xl text-right font-bold text-base text-[#185fa5]"
+                    required
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isPlacementSaving}
+                className="w-full py-3.5 bg-[#1f1e1c] hover:bg-black text-white rounded-2xl font-bold text-xs shadow-sm transition-all cursor-pointer"
+              >
+                {isPlacementSaving ? "در حال ذخیره‌سازی..." : "ذخیره تغییرات سوالات آزمون تعیین سطح"}
               </button>
             </form>
           </div>

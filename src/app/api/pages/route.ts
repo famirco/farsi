@@ -21,6 +21,36 @@ const DEFAULT_PAGES: Record<string, { titleEn: string; titleFa: string; contentE
     contentEn: "Your privacy is important to us. Farsiyar collects only essential account data (username, streak, progress XP) to deliver personalized learning experiences. We do not sell your personal information or share voice recordings with third parties.",
     contentFa: "حفظ حریم خصوصی شما اولویت ماست. فارسیار تنها اطلاعات ضروری حساب کاربر (نام کاربری، امتیازات و پیشرفت درسی) را ذخیره می‌کند و اطلاعات یا صداهای ضبط شده به هیچ وجه با شخص ثالث به اشتراک گذاشته نمی‌شوند.",
   },
+  placement_test: {
+    titleEn: "Placement Test & Assessment",
+    titleFa: "آزمون تعیین سطح و ارزیابی اولیه",
+    contentEn: JSON.stringify({
+      listeningPromptEn: "Listen to the audio clip and select where the speaker says they are going today:",
+      listeningPromptFa: "به فایل صوتی گوش دهید و مشخص کنید گوینده امروز به کجا می‌رود:",
+      listeningOptions: ["مدرسه (School)", "بازار (Market)", "پارک (Park)", "خانه (Home)"],
+      listeningCorrect: "مدرسه (School)",
+      readingPromptEn: "Translate the following word to English: «کتاب»",
+      readingPromptFa: "ترجمه کلمه زیر را انتخاب کنید: «کتاب»",
+      readingOptions: ["Book", "Pen", "Notebook", "Chair"],
+      readingCorrect: "Book",
+      speakingPromptEn: "Say 'سلام' (Salâm) out loud in Persian:",
+      speakingPromptFa: "جمله روبرو را با صدای بلند تلفظ کنید: «سلام»",
+      speakingTarget: "سلام",
+    }),
+    contentFa: JSON.stringify({
+      listeningPromptEn: "Listen to the audio clip and select where the speaker says they are going today:",
+      listeningPromptFa: "به فایل صوتی گوش دهید و مشخص کنید گوینده امروز به کجا می‌رود:",
+      listeningOptions: ["مدرسه (School)", "بازار (Market)", "پارک (Park)", "خانه (Home)"],
+      listeningCorrect: "مدرسه (School)",
+      readingPromptEn: "Translate the following word to English: «کتاب»",
+      readingPromptFa: "ترجمه کلمه زیر را انتخاب کنید: «کتاب»",
+      readingOptions: ["Book", "Pen", "Notebook", "Chair"],
+      readingCorrect: "Book",
+      speakingPromptEn: "Say 'سلام' (Salâm) out loud in Persian:",
+      speakingPromptFa: "جمله روبرو را با صدای بلند تلفظ کنید: «سلام»",
+      speakingTarget: "سلام",
+    }),
+  },
 };
 
 export async function GET(req: Request) {

@@ -81,7 +81,7 @@ export default function Home() {
       navContact: "Contact",
       navPrivacy: "Privacy",
       signInBtn: "Sign In",
-      newToFarsi: "New to Farsiyar? Onboarding & Test",
+      newToFarsi: "New to Farsiyar? Take Placement Test",
       feature1Title: "Gamified Learning Path",
       feature1Desc: "Bite-sized interactive lessons arranged in a visual roadmap with rewards and daily streaks.",
       feature2Title: "Voice & Speech Recognition",
@@ -146,7 +146,7 @@ export default function Home() {
       navContact: "تماس با ما",
       navPrivacy: "حریم خصوصی",
       signInBtn: "ورود به حساب",
-      newToFarsi: "ثبت‌نام و تعیین سطح جدید",
+      newToFarsi: "ثبت‌نام و آزمون تعیین سطح جدید",
       feature1Title: "مسیر یادگیری بازی‌وار",
       feature1Desc: "درس‌های کوتاه ۵ دقیقه‌ای همراه با سیستم استریک، امتیاز و نقشه راه بصری.",
       feature2Title: "تشخیص هوشمند تلفظ",
@@ -325,7 +325,7 @@ export default function Home() {
 
             <button
               type="button"
-              onClick={() => router.push("/onboarding")}
+              onClick={() => router.push("/placement-test")}
               className="w-full py-3 bg-[#e6f1fb] hover:bg-[#d0e5f7] text-[#185fa5] text-center rounded-xl font-semibold text-xs transition-all cursor-pointer border border-[#378add]/20 mt-3"
             >
               {curr.newToFarsi}
@@ -516,7 +516,7 @@ export default function Home() {
             <h4 className="font-bold text-xs text-[#1f1e1c] mb-3">{curr.footerAccount}</h4>
             <ul className="space-y-2 text-[11px]">
               <li><a href="#signin" className="hover:underline">{curr.signInBtn}</a></li>
-              <li><Link href="/onboarding" className="hover:underline">{curr.newToFarsi}</Link></li>
+              <li><Link href="/placement-test" className="hover:underline">{curr.newToFarsi}</Link></li>
             </ul>
           </div>
         </div>
