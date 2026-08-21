@@ -121,6 +121,13 @@ export default function Home() {
       faq3A: "In speaking lessons, you listen to a native pronunciation audio and repeat it aloud into your microphone. Our AI engine verifies your response instantly.",
       faq4Q: "Can parents monitor their children's progress?",
       faq4A: "Yes! Parent accounts allow creating child profiles, tracking completed lessons, XP earnings, and unlocking course terms.",
+      footerDesc: "Interactive bilingual Persian learning platform for heritage learners, diaspora families, and children worldwide.",
+      footerCourse1: "Foundations & Alphabet",
+      footerCourse2: "Daily Conversation",
+      footerCourse3: "Heritage & Culture",
+      footerPlatform: "Platform & Community",
+      footerAccount: "Account & Access",
+      footerCopyright: "Farsiyar Persian Learning App. All rights reserved.",
     },
     fa: {
       welcome: "به فارسی یار خوش آمدید",
@@ -178,6 +185,13 @@ export default function Home() {
       faq3A: "در تمرین‌های گفتاری، صدای تلفظ واقعی را می‌شنوید و سپس آن را در میکروفون تکرار می‌کنید. موتور هوشمند ما بلافاصله صحت تلفظ شما را ارزیابی می‌کند.",
       faq4Q: "آیا والدین می‌توانند بر پیشرفت فرزندان خود نظارت کنند؟",
       faq4A: "بله! حساب‌های والدین امکان ساخت پروفایل فرزند، مشاهده درس‌های تکمیل شده، امتیازات و فعال‌سازی ترم‌های مختلف را فراهم می‌کند.",
+      footerDesc: "پلتفرم دو زبانه هوشمند برای آموزش زبان و فرهنگ اصیل ایرانی به فرزندان، زبان‌آموزان میراثی و خانواده‌های مقیم خارج از کشور.",
+      footerCourse1: "الفبا و پایه‌ها",
+      footerCourse2: "مکالمه روزمره",
+      footerCourse3: "فرهنگ و میراث اصیل",
+      footerPlatform: "پلتفرم و ارتباطات",
+      footerAccount: "حساب کاربری و دسترسی",
+      footerCopyright: "کلیه حقوق برای سامانه آموزش زبان فارسیار محفوظ است.",
     },
   };
 
@@ -491,21 +505,21 @@ export default function Home() {
               <span className="font-bold text-[#1f1e1c] text-base">Farsiyar</span>
             </div>
             <p className="text-[11px] text-[#6b6a63] leading-relaxed">
-              Interactive bilingual Persian learning platform for heritage learners, diaspora families, and children worldwide.
+              {curr.footerDesc}
             </p>
           </div>
 
           <div>
             <h4 className="font-bold text-xs text-[#1f1e1c] mb-3">{curr.navCourses}</h4>
             <ul className="space-y-2 text-[11px]">
-              <li><a href="#courses" className="hover:underline">Foundations & Alphabet</a></li>
-              <li><a href="#courses" className="hover:underline">Daily Conversation</a></li>
-              <li><a href="#courses" className="hover:underline">Heritage & Culture</a></li>
+              <li><a href="#courses" className="hover:underline">{curr.footerCourse1}</a></li>
+              <li><a href="#courses" className="hover:underline">{curr.footerCourse2}</a></li>
+              <li><a href="#courses" className="hover:underline">{curr.footerCourse3}</a></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="font-bold text-xs text-[#1f1e1c] mb-3">Platform & Community</h4>
+            <h4 className="font-bold text-xs text-[#1f1e1c] mb-3">{curr.footerPlatform}</h4>
             <ul className="space-y-2 text-[11px]">
               <li><Link href="/blog" className="hover:underline">{curr.navBlog}</Link></li>
               <li><Link href="/about" className="hover:underline">{curr.navAbout}</Link></li>
@@ -515,7 +529,7 @@ export default function Home() {
           </div>
 
           <div>
-            <h4 className="font-bold text-xs text-[#1f1e1c] mb-3">Account & Access</h4>
+            <h4 className="font-bold text-xs text-[#1f1e1c] mb-3">{curr.footerAccount}</h4>
             <ul className="space-y-2 text-[11px]">
               <li><a href="#signin" className="hover:underline">{curr.signInBtn}</a></li>
               <li><Link href="/onboarding" className="hover:underline">{curr.newToFarsi}</Link></li>
@@ -525,7 +539,7 @@ export default function Home() {
 
         <div className="max-w-6xl mx-auto px-6 pt-6 border-t border-[#e2e0d8] flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-start text-[11px]">
           <div>
-            &copy; {new Date().getFullYear()} Farsiyar Persian Learning App. All rights reserved.
+            &copy; {new Date().getFullYear()} {curr.footerCopyright}
           </div>
           <div className="flex items-center gap-6 text-[#6b6a63]">
             <Link href="/privacy" className="hover:underline">{curr.navPrivacy}</Link>
