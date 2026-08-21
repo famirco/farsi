@@ -70,12 +70,13 @@ export default function Home() {
       subWelcome: "Master Persian Naturally Through Gamified Micro-Lessons",
       tagline: "Designed specifically for diaspora families, heritage adult learners, and children.",
       loginTitle: "Sign In",
-      loginSubtitle: "Enter test credentials to start practicing",
+      loginSubtitle: "Enter your account details to start practicing",
       usernameLabel: "Username",
       passwordLabel: "Password",
       btnLabel: "Continue",
-      errorMsg: "Invalid credentials (use student/student or admin/admin)",
-      helpText: "Test Accounts: student/student (Student Role) or admin/admin (Admin Role)",
+      errorMsg: "Invalid credentials",
+      helpText: "Enter your registered username and password",
+      quickDashboard: "Continue to Dashboard as",
       badge: "HERITAGE PERSIAN PLATFORM",
       navCourses: "Courses",
       navMethodology: "Methodology",
@@ -134,12 +135,13 @@ export default function Home() {
       subWelcome: "آموزش هوشمند و گام‌به‌گام زبان فارسی برای تمام سنین",
       tagline: "طراحی ویژه برای خانواده‌های ایرانی خارج از کشور، زبان‌آموزان میراثی و کودکان.",
       loginTitle: "ورود به سیستم",
-      loginSubtitle: "نام کاربری و رمز عبور آزمایشی را وارد کنید",
+      loginSubtitle: "نام کاربری و رمز عبور خود را وارد کنید",
       usernameLabel: "نام کاربری",
       passwordLabel: "رمز عبور",
       btnLabel: "ورود و ادامه",
-      errorMsg: "نام کاربری یا رمز عبور اشتباه است (از student/student یا admin/admin استفاده کنید)",
-      helpText: "حساب‌های آزمایشی: student/student (دانش‌آموز) یا admin/admin (مدیر)",
+      errorMsg: "نام کاربری یا رمز عبور اشتباه است",
+      helpText: "نام کاربری و رمز عبور ثبت شده خود را وارد کنید",
+      quickDashboard: "ورود سریع به داشبورد به عنوان",
       badge: "پلتفرم آموزش فارسی میراثی",
       navCourses: "دوره‌های آموزشی",
       navMethodology: "روش آموزش",
@@ -342,7 +344,7 @@ export default function Home() {
                   onClick={() => router.push("/dashboard")}
                   className="text-xs text-[#185fa5] font-semibold hover:underline cursor-pointer"
                 >
-                  Go to Dashboard as {savedUser}
+                  {curr.quickDashboard} <span className="font-bold">{savedUser}</span>
                 </button>
               </div>
             )}
