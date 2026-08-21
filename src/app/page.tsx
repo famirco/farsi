@@ -12,14 +12,8 @@ export default function Home() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [savedUser, setSavedUser] = useState("");
   const [openFaq, setOpenFaq] = useState<number | null>(0);
-
   useEffect(() => {
-    const user = localStorage.getItem("farsi_username");
-    if (user) {
-      setSavedUser(user);
-    }
     const savedLang = localStorage.getItem("farsi_lang");
     if (savedLang === "fa" || savedLang === "en") {
       setLang(savedLang);
@@ -336,18 +330,6 @@ export default function Home() {
             >
               {curr.newToFarsi}
             </button>
-
-            {savedUser && (
-              <div className="mt-4 text-center">
-                <button
-                  type="button"
-                  onClick={() => router.push("/dashboard")}
-                  className="text-xs text-[#185fa5] font-semibold hover:underline cursor-pointer"
-                >
-                  {curr.quickDashboard} <span className="font-bold">{savedUser}</span>
-                </button>
-              </div>
-            )}
           </div>
         </section>
 
