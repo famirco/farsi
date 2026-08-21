@@ -9,9 +9,23 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Username and password are required" }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { username },
-    });
+    let user;
+    try {
+      user = await prisma.user.findUnique({
+        where: { username },
+      });
+    } catch (dbErr: any) {
+      if (dbErr?.code === "P2022" || dbErr?.message?.includes("childProfile")) {
+        try {
+          await prisma.$executeRawUnsafe(`ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "childProfile" TEXT;`);
+          user = await prisma.user.findUnique({ where: { username } });
+        } catch (healErr) {
+          throw dbErr;
+        }
+      } else {
+        throw dbErr;
+      }
+    }
 
     if (!user || user.password !== password) {
       return NextResponse.json({ error: "Invalid username or password" }, { status: 401 });
