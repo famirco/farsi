@@ -15,9 +15,8 @@ Farsiyar is an interactive Persian language learning application built with Next
 - **Database Backup & Restore System:**
   - Export full DB backup as a structured JSON file (`farsiyar_db_backup_YYYY-MM-DD.json`).
   - Transactional import & restore system in Admin Panel (`/admin` under Backup & Restore tab) for terms, levels, lessons, questions, and user progress.
-- **Production Quick Login Link & Subtitle Localization:**
-  - Localized the persistent session button to "ورود سریع به داشبورد به عنوان [نام کاربر]" in Persian and "Continue to Dashboard as [user]" in English.
-  - Updated login card subtitles to production-ready copy ("نام کاربری و رمز عبور خود را وارد کنید").
+- **Clean Production Login Card:**
+  - Removed the quick login button (`savedUser`) completely from the landing page login card so users always see a clean, production-ready sign-in box.
 
 ## Database & API Routes
 - `prisma/schema.prisma`: Schema using `postgresql` datasource provider.
