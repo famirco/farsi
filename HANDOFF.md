@@ -15,10 +15,8 @@ Farsiyar is an interactive Persian language learning application built with Next
 - **Database Backup & Restore System:**
   - Export full DB backup as a structured JSON file (`farsiyar_db_backup_YYYY-MM-DD.json`).
   - Transactional import & restore system in Admin Panel (`/admin` under Backup & Restore tab) for terms, levels, lessons, questions, and user progress.
-- **Role Routing Fix & 12-Field Child Profile Questionnaire:**
-  - Resolved account creation bug in `api/users` so choosing "I want to learn Persian myself" (`ADULT_HERITAGE`) correctly routes users to the Adult Student Dashboard instead of Kids Mode.
-  - Added comprehensive 12-field child background questionnaire for Parent registration (name, family, age, country of residence, mother nationality, father nationality, first language, home language, cultural familiarity, learning interest, peers connection, and relatives connection).
-  - Added `childProfile` JSON column in Prisma schema to persist full survey data.
+- **Auto-Healing Database Schema Migration:**
+  - Added dynamic SQL auto-healing (`ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "childProfile" TEXT;`) inside `/api/auth` and `/api/user` to handle missing PostgreSQL columns gracefully without throwing `P2022 ColumnNotFound` errors.
 
 ## Database & API Routes
 - `prisma/schema.prisma`: Schema using `postgresql` datasource provider.
