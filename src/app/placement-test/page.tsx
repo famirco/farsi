@@ -57,6 +57,18 @@ export default function PlacementTest() {
   const [holidayFamiliarity, setHolidayFamiliarity] = useState(70);
   const [alphabetRecognition, setAlphabetRecognition] = useState("No");
 
+  // Detailed Child Profile Questionnaire (for Parent registration)
+  const [childFirstName, setChildFirstName] = useState("");
+  const [childLastName, setChildLastName] = useState("");
+  const [childAge, setChildAge] = useState("7");
+  const [residenceCountry, setResidenceCountry] = useState("Germany");
+  const [motherNationality, setMotherNationality] = useState("Iranian");
+  const [fatherNationality, setFatherNationality] = useState("Iranian");
+  const [firstLanguage, setFirstLanguage] = useState("English");
+  const [learningInterest, setLearningInterest] = useState(80);
+  const [persianFriendsConnection, setPersianFriendsConnection] = useState("Medium");
+  const [relativesConnection, setRelativesConnection] = useState("High");
+
   // Registration states
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -237,6 +249,21 @@ export default function PlacementTest() {
     setError("");
     if (!username.trim() || !password.trim()) return;
 
+    const childProfileData = accountType === "PARENT" ? {
+      name: childFirstName,
+      family: childLastName,
+      age: childAge,
+      residenceCountry,
+      motherNationality,
+      fatherNationality,
+      firstLanguage,
+      homeLanguage,
+      culturalFamiliarity: holidayFamiliarity,
+      learningInterest,
+      persianFriendsConnection,
+      relativesConnection,
+    } : null;
+
     setIsLoading(true);
     try {
       const res = await fetch("/api/users", {
@@ -249,6 +276,7 @@ export default function PlacementTest() {
           homeLanguage,
           holidayFamiliarity,
           alphabetRecognition,
+          childProfile: childProfileData,
         }),
       });
 
@@ -344,58 +372,244 @@ export default function PlacementTest() {
         {/* STEP 2: Background Questionnaire */}
         {step === "questionnaire" && (
           <div className="bg-white border border-[#e2e0d8] rounded-3xl p-8 shadow-sm space-y-6">
-            <h2 className="text-xl font-bold text-[#1f1e1c] text-center">{curr.step1Title}</h2>
+            <h2 className="text-xl font-bold text-[#1f1e1c] text-center">
+              {accountType === "PARENT"
+                ? (lang === "fa" ? "مشخصات فرزند (Child Profile Details)" : "Child Profile & Background")
+                : curr.step1Title}
+            </h2>
 
-            <div className="space-y-5 text-xs">
-              <div>
-                <label className="block font-bold text-[#6b6a63] mb-2">{curr.step1Label1}</label>
-                <select
-                  value={homeLanguage}
-                  onChange={(e) => setHomeLanguage(e.target.value)}
-                  className="w-full p-3 rounded-xl border border-[#e2e0d8] bg-[#faf9f6] font-medium"
-                >
-                  <option value="Mostly Persian">عمدتاً فارسی (Mostly Persian)</option>
-                  <option value="Mix of English & Persian">ترکیب فارسی و انگلیسی (Mix of Both)</option>
-                  <option value="Mostly English">عمدتاً انگلیسی (Mostly English)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block font-bold text-[#6b6a63] mb-2">{curr.step1Label2}</label>
-                <input
-                  type="range"
-                  min="0"
-                  max="100"
-                  value={holidayFamiliarity}
-                  onChange={(e) => setHolidayFamiliarity(Number(e.target.value))}
-                  className="w-full accent-[#378add]"
-                />
-                <div className="flex justify-between text-[11px] text-[#9a988f] mt-1 font-semibold">
-                  <span>{curr.holidayLow}</span>
-                  <span>{curr.holidayHigh}</span>
+            {accountType === "PARENT" ? (
+              <div className="space-y-4 text-xs">
+                {/* Name & Family */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-bold text-[#6b6a63] mb-1">
+                      {lang === "fa" ? "نام کودک (First Name)" : "Child's First Name"}
+                    </label>
+                    <input
+                      type="text"
+                      value={childFirstName}
+                      onChange={(e) => setChildFirstName(e.target.value)}
+                      placeholder="e.g. Kian"
+                      className="w-full p-2.5 rounded-xl border border-[#e2e0d8] bg-[#faf9f6]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-[#6b6a63] mb-1">
+                      {lang === "fa" ? "نام خانوادگی (Last Name)" : "Child's Last Name"}
+                    </label>
+                    <input
+                      type="text"
+                      value={childLastName}
+                      onChange={(e) => setChildLastName(e.target.value)}
+                      placeholder="e.g. Tehrani"
+                      className="w-full p-2.5 rounded-xl border border-[#e2e0d8] bg-[#faf9f6]"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <label className="block font-bold text-[#6b6a63] mb-2">{curr.alphabetLabel}</label>
-                <div className="flex gap-3">
-                  {["Yes", "Partial", "No"].map((val) => (
-                    <button
-                      key={val}
-                      type="button"
-                      onClick={() => setAlphabetRecognition(val)}
-                      className={`flex-1 py-2.5 rounded-xl border font-bold text-xs transition-all ${
-                        alphabetRecognition === val
-                          ? "bg-[#1f1e1c] text-white border-[#1f1e1c]"
-                          : "bg-[#faf9f6] text-[#6b6a63] border-[#e2e0d8]"
-                      }`}
+                {/* Age & Residence Country */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-bold text-[#6b6a63] mb-1">
+                      {lang === "fa" ? "سن (Age)" : "Age"}
+                    </label>
+                    <input
+                      type="number"
+                      value={childAge}
+                      onChange={(e) => setChildAge(e.target.value)}
+                      min="3"
+                      max="18"
+                      className="w-full p-2.5 rounded-xl border border-[#e2e0d8] bg-[#faf9f6]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-[#6b6a63] mb-1">
+                      {lang === "fa" ? "کشور محل زندگی (Country of Residence)" : "Country of Residence"}
+                    </label>
+                    <input
+                      type="text"
+                      value={residenceCountry}
+                      onChange={(e) => setResidenceCountry(e.target.value)}
+                      placeholder="e.g. Germany, USA, UK"
+                      className="w-full p-2.5 rounded-xl border border-[#e2e0d8] bg-[#faf9f6]"
+                    />
+                  </div>
+                </div>
+
+                {/* Mother & Father Nationality */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-bold text-[#6b6a63] mb-1">
+                      {lang === "fa" ? "ملیت مادر (Mother's Nationality)" : "Mother's Nationality"}
+                    </label>
+                    <input
+                      type="text"
+                      value={motherNationality}
+                      onChange={(e) => setMotherNationality(e.target.value)}
+                      className="w-full p-2.5 rounded-xl border border-[#e2e0d8] bg-[#faf9f6]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-[#6b6a63] mb-1">
+                      {lang === "fa" ? "ملیت پدر (Father's Nationality)" : "Father's Nationality"}
+                    </label>
+                    <input
+                      type="text"
+                      value={fatherNationality}
+                      onChange={(e) => setFatherNationality(e.target.value)}
+                      className="w-full p-2.5 rounded-xl border border-[#e2e0d8] bg-[#faf9f6]"
+                    />
+                  </div>
+                </div>
+
+                {/* First Language & Home Language */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block font-bold text-[#6b6a63] mb-1">
+                      {lang === "fa" ? "زبان اول کودک (First Language)" : "Child's First Language"}
+                    </label>
+                    <input
+                      type="text"
+                      value={firstLanguage}
+                      onChange={(e) => setFirstLanguage(e.target.value)}
+                      placeholder="e.g. English, German"
+                      className="w-full p-2.5 rounded-xl border border-[#e2e0d8] bg-[#faf9f6]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-bold text-[#6b6a63] mb-1">
+                      {lang === "fa" ? "زبان خانه (Home Language)" : "Home Language"}
+                    </label>
+                    <select
+                      value={homeLanguage}
+                      onChange={(e) => setHomeLanguage(e.target.value)}
+                      className="w-full p-2.5 rounded-xl border border-[#e2e0d8] bg-[#faf9f6]"
                     >
-                      {val}
-                    </button>
-                  ))}
+                      <option value="Mostly Persian">عمدتاً فارسی (Mostly Persian)</option>
+                      <option value="Mix of English & Persian">ترکیب فارسی و انگلیسی (Mix of Both)</option>
+                      <option value="Mostly English">عمدتاً انگلیسی (Mostly English)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Cultural Familiarity & Learning Interest */}
+                <div className="space-y-3 pt-1">
+                  <div>
+                    <label className="block font-bold text-[#6b6a63] mb-1">
+                      {lang === "fa" ? "میزان آشنایی با فرهنگ ایرانی (Familiarity with Persian Culture)" : "Familiarity with Persian Culture"}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={holidayFamiliarity}
+                      onChange={(e) => setHolidayFamiliarity(Number(e.target.value))}
+                      className="w-full accent-[#378add]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block font-bold text-[#6b6a63] mb-1">
+                      {lang === "fa" ? "میزان علاقه‌مندی به یادگیری زبان فارسی (Interest in Learning Persian)" : "Interest in Learning Persian"}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={learningInterest}
+                      onChange={(e) => setLearningInterest(Number(e.target.value))}
+                      className="w-full accent-[#378add]"
+                    />
+                  </div>
+                </div>
+
+                {/* Connections with Peers & Relatives */}
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <div>
+                    <label className="block font-bold text-[#6b6a63] mb-1">
+                      {lang === "fa" ? "ارتباط با هم‌سن‌های فارسی‌زبان" : "Persian Peers Connection"}
+                    </label>
+                    <select
+                      value={persianFriendsConnection}
+                      onChange={(e) => setPersianFriendsConnection(e.target.value)}
+                      className="w-full p-2.5 rounded-xl border border-[#e2e0d8] bg-[#faf9f6]"
+                    >
+                      <option value="High">زیاد (High)</option>
+                      <option value="Medium">متوسط (Medium)</option>
+                      <option value="Low">کم (Low)</option>
+                      <option value="None">هیچ (None)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block font-bold text-[#6b6a63] mb-1">
+                      {lang === "fa" ? "ارتباط با اقوام ایرانی" : "Connection with Iranian Relatives"}
+                    </label>
+                    <select
+                      value={relativesConnection}
+                      onChange={(e) => setRelativesConnection(e.target.value)}
+                      className="w-full p-2.5 rounded-xl border border-[#e2e0d8] bg-[#faf9f6]"
+                    >
+                      <option value="High">زیاد (High)</option>
+                      <option value="Medium">متوسط (Medium)</option>
+                      <option value="Low">کم (Low)</option>
+                      <option value="None">هیچ (None)</option>
+                    </select>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-5 text-xs">
+                <div>
+                  <label className="block font-bold text-[#6b6a63] mb-2">{curr.step1Label1}</label>
+                  <select
+                    value={homeLanguage}
+                    onChange={(e) => setHomeLanguage(e.target.value)}
+                    className="w-full p-3 rounded-xl border border-[#e2e0d8] bg-[#faf9f6] font-medium"
+                  >
+                    <option value="Mostly Persian">عمدتاً فارسی (Mostly Persian)</option>
+                    <option value="Mix of English & Persian">ترکیب فارسی و انگلیسی (Mix of Both)</option>
+                    <option value="Mostly English">عمدتاً انگلیسی (Mostly English)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-[#6b6a63] mb-2">{curr.step1Label2}</label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={holidayFamiliarity}
+                    onChange={(e) => setHolidayFamiliarity(Number(e.target.value))}
+                    className="w-full accent-[#378add]"
+                  />
+                  <div className="flex justify-between text-[11px] text-[#9a988f] mt-1 font-semibold">
+                    <span>{curr.holidayLow}</span>
+                    <span>{curr.holidayHigh}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-[#6b6a63] mb-2">{curr.alphabetLabel}</label>
+                  <div className="flex gap-3">
+                    {["Yes", "Partial", "No"].map((val) => (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => setAlphabetRecognition(val)}
+                        className={`flex-1 py-2.5 rounded-xl border font-bold text-xs transition-all ${
+                          alphabetRecognition === val
+                            ? "bg-[#1f1e1c] text-white border-[#1f1e1c]"
+                            : "bg-[#faf9f6] text-[#6b6a63] border-[#e2e0d8]"
+                        }`}
+                      >
+                        {val}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="flex gap-3 pt-2">
               <button

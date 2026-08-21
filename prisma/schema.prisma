@@ -15,6 +15,7 @@ model User {
   accountType           String    @default("ADULT_HERITAGE") // "ADULT_HERITAGE", "PARENT", "CHILD"
   parentUserId          String?   // Links child to parent user
   whyLearning           String?   // Motivational quote for heritage adults
+  childProfile          String?   // JSON string for child details (name, family, age, country, nationalities, languages, etc.)
   xp                    Int       @default(0)
   streak                Int       @default(0)
   lastActive            DateTime?
