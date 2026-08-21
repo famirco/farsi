@@ -15,8 +15,9 @@ Farsiyar is an interactive Persian language learning application built with Next
 - **Database Backup & Restore System:**
   - Export full DB backup as a structured JSON file (`farsiyar_db_backup_YYYY-MM-DD.json`).
   - Transactional import & restore system in Admin Panel (`/admin` under Backup & Restore tab) for terms, levels, lessons, questions, and user progress.
-- **Clean Production Login Card:**
-  - Removed the quick login button (`savedUser`) completely from the landing page login card so users always see a clean, production-ready sign-in box.
+- **Placement Test System & Admin CMS Manager:**
+  - Renamed `/onboarding` to `/placement-test` ("آزمون تعیین سطح") with compatibility redirect at `/onboarding`.
+  - Added dedicated **Placement Test Tab** in Admin Panel (`/admin` under "Placement Test" tab) allowing admins to edit and customize Placement Test questions, prompts (English & Persian), options, and target speech words dynamically in database.
 
 ## Database & API Routes
 - `prisma/schema.prisma`: Schema using `postgresql` datasource provider.
